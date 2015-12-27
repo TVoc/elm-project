@@ -1,0 +1,289 @@
+Elm.Item = Elm.Item || {};
+Elm.Item.make = function (_elm) {
+   "use strict";
+   _elm.Item = _elm.Item || {};
+   if (_elm.Item.values) return _elm.Item.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Static = Elm.Static.make(_elm),
+   $String = Elm.String.make(_elm);
+   var _op = {};
+   var truncate = function (text) {
+      return A2($String.append,A3($String.slice,0,200,text),"...");
+   };
+   var borderStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2"
+                                                     ,_0: "border-left"
+                                                     ,_1: "thick double rgb(201, 31, 31)"}]));
+   var genBorderStyle = function (model) {
+      return model.focus ? _U.list([borderStyle]) : _U.list([]);
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "Do": return _U.update(model,{done: true});
+         case "Undo": return _U.update(model,{done: false});
+         case "Pin": return _U.update(model,{pinned: true});
+         case "Unpin": return _U.update(model,{pinned: false});
+         case "More": return _U.update(model,{truncated: false});
+         case "Less": return _U.update(model,{truncated: true});
+         default: return model;}
+   });
+   var NoOp = {ctor: "NoOp"};
+   var Less = {ctor: "Less"};
+   var More = {ctor: "More"};
+   var moreLessButton = F2(function (address,model) {
+      return model.truncated ? A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,More)]),
+      _U.list([$Html.text("More")])) : A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,Less)]),
+      _U.list([$Html.text("Less")]));
+   });
+   var Unpin = {ctor: "Unpin"};
+   var Pin = {ctor: "Pin"};
+   var pinUnpinButton = F2(function (address,model) {
+      return model.pinned ? A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,Unpin)]),
+      _U.list([$Html.text("Unpin")])) : A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,Pin)]),
+      _U.list([$Html.text("Pin")]));
+   });
+   var Undo = {ctor: "Undo"};
+   var Do = {ctor: "Do"};
+   var doUndoButton = F2(function (address,model) {
+      return model.done ? A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,Undo)]),
+      _U.list([$Html.text("Undo")])) : A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,Do)]),
+      _U.list([$Html.text("Do")]));
+   });
+   var monthToInt = function (month) {
+      var _p1 = month;
+      switch (_p1.ctor)
+      {case "Jan": return 0;
+         case "Feb": return 1;
+         case "Mar": return 2;
+         case "Apr": return 3;
+         case "May": return 4;
+         case "Jun": return 5;
+         case "Jul": return 6;
+         case "Aug": return 7;
+         case "Sep": return 8;
+         case "Oct": return 9;
+         case "Nov": return 10;
+         default: return 11;}
+   };
+   var extractTitleEmail = function (email) {
+      return email.title;
+   };
+   var extractTitleReminder = function (reminder) {
+      return reminder.body;
+   };
+   var extractDateEmail = function (email) {
+      var dateRes = $Date.fromString(email.date);
+      var _p2 = dateRes;
+      if (_p2.ctor === "Ok") {
+            var _p3 = _p2._0;
+            return {ctor: "_Tuple3"
+                   ,_0: $Date.year(_p3)
+                   ,_1: monthToInt($Date.month(_p3))
+                   ,_2: $Date.day(_p3)};
+         } else {
+            return {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0};
+         }
+   };
+   var extractDateReminder = function (reminder) {
+      var dateRes = $Date.fromString(reminder.created);
+      var _p4 = dateRes;
+      if (_p4.ctor === "Ok") {
+            var _p5 = _p4._0;
+            return {ctor: "_Tuple3"
+                   ,_0: $Date.year(_p5)
+                   ,_1: monthToInt($Date.month(_p5))
+                   ,_2: $Date.day(_p5)};
+         } else {
+            return {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0};
+         }
+   };
+   var extractEmail = function (model) {
+      var _p6 = model.email;
+      if (_p6.ctor === "Just") {
+            return _p6._0;
+         } else {
+            return {from: "",to: "",title: "",body: "",date: ""};
+         }
+   };
+   var showEmailBodyTrunc = function (model) {
+      var _p7 = model.itemtype;
+      if (_p7.ctor === "Email") {
+            var email = extractEmail(model);
+            return model.truncated ? truncate(email.body) : email.body;
+         } else {
+            return "";
+         }
+   };
+   var viewEmail = F2(function (address,model) {
+      var _p8 = model.itemtype;
+      if (_p8.ctor === "Email") {
+            var theStyle = genBorderStyle(model);
+            var email = extractEmail(model);
+            return _U.cmp($String.length(email.body),
+            200) > 0 ? A2($Html.div,
+            theStyle,
+            _U.list([A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    A2($String.append,
+                    A2($String.append,email.title," | "),
+                    email.from),
+                    " says:"))]))
+                    ,A2($Html.br,_U.list([]),_U.list([]))
+                    ,A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(showEmailBodyTrunc(model))]))
+                    ,A2(moreLessButton,address,model)
+                    ,A2(doUndoButton,address,model)
+                    ,A2(pinUnpinButton,address,model)
+                    ,A2($Html.br,_U.list([]),_U.list([]))
+                    ,A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    "\r\n\r\ndate: ",
+                    email.date))]))
+                    ,A2($Html.br,_U.list([]),_U.list([]))])) : A2($Html.div,
+            theStyle,
+            _U.list([A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    A2($String.append,
+                    A2($String.append,email.title," | "),
+                    email.from),
+                    " says:"))]))
+                    ,A2($Html.br,_U.list([]),_U.list([]))
+                    ,A2($Html.div,_U.list([]),_U.list([$Html.text(email.body)]))
+                    ,A2(doUndoButton,address,model)
+                    ,A2(pinUnpinButton,address,model)
+                    ,A2($Html.br,_U.list([]),_U.list([]))
+                    ,A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    "\r\n\r\ndate: ",
+                    email.date))]))
+                    ,A2($Html.br,_U.list([]),_U.list([]))]));
+         } else {
+            return A2($Html.div,_U.list([]),_U.list([]));
+         }
+   });
+   var extractReminder = function (model) {
+      var _p9 = model.reminder;
+      if (_p9.ctor === "Just") {
+            return _p9._0;
+         } else {
+            return {body: "",created: ""};
+         }
+   };
+   var extractDate = function (model) {
+      var _p10 = model.itemtype;
+      if (_p10.ctor === "Reminder") {
+            var reminder = extractReminder(model);
+            return extractDateReminder(reminder);
+         } else {
+            var email = extractEmail(model);
+            return extractDateEmail(email);
+         }
+   };
+   var extractTitle = function (model) {
+      var _p11 = model.itemtype;
+      if (_p11.ctor === "Reminder") {
+            var reminder = extractReminder(model);
+            return extractTitleReminder(reminder);
+         } else {
+            var email = extractEmail(model);
+            return extractTitleEmail(email);
+         }
+   };
+   var viewReminder = F2(function (address,model) {
+      var _p12 = model.itemtype;
+      if (_p12.ctor === "Reminder") {
+            var theStyle = genBorderStyle(model);
+            var reminder = extractReminder(model);
+            return A2($Html.div,
+            theStyle,
+            _U.list([A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    reminder.body,
+                    "\r\n\r\n"))]))
+                    ,A2(doUndoButton,address,model)
+                    ,A2(pinUnpinButton,address,model)
+                    ,A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    "\r\n\r\ndate: ",
+                    reminder.created))]))
+                    ,A2($Html.br,_U.list([]),_U.list([]))]));
+         } else {
+            return A2($Html.div,_U.list([]),_U.list([]));
+         }
+   });
+   var view = F2(function (address,model) {
+      var _p13 = model.itemtype;
+      if (_p13.ctor === "Email") {
+            return A2(viewEmail,address,model);
+         } else {
+            return A2(viewReminder,address,model);
+         }
+   });
+   var Model = F7(function (a,b,c,d,e,f,g) {
+      return {itemtype: a
+             ,email: b
+             ,reminder: c
+             ,done: d
+             ,pinned: e
+             ,truncated: f
+             ,focus: g};
+   });
+   var Reminder = {ctor: "Reminder"};
+   var initReminder = function (reminder) {
+      return {itemtype: Reminder
+             ,email: $Maybe.Nothing
+             ,reminder: $Maybe.Just(reminder)
+             ,done: false
+             ,pinned: false
+             ,truncated: true
+             ,focus: false};
+   };
+   var Email = {ctor: "Email"};
+   var initEmail = function (email) {
+      return {itemtype: Email
+             ,email: $Maybe.Just(email)
+             ,reminder: $Maybe.Nothing
+             ,done: false
+             ,pinned: false
+             ,truncated: true
+             ,focus: false};
+   };
+   return _elm.Item.values = {_op: _op
+                             ,initReminder: initReminder
+                             ,initEmail: initEmail
+                             ,update: update
+                             ,view: view
+                             ,extractDate: extractDate
+                             ,extractTitle: extractTitle
+                             ,Model: Model
+                             ,Do: Do
+                             ,Undo: Undo
+                             ,Pin: Pin
+                             ,Unpin: Unpin
+                             ,More: More
+                             ,Less: Less
+                             ,NoOp: NoOp};
+};

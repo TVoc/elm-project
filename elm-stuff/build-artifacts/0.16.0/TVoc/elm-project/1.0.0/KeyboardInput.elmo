@@ -1,0 +1,88 @@
+Elm.KeyboardInput = Elm.KeyboardInput || {};
+Elm.KeyboardInput.make = function (_elm) {
+   "use strict";
+   _elm.KeyboardInput = _elm.KeyboardInput || {};
+   if (_elm.KeyboardInput.values) return _elm.KeyboardInput.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Char = Elm.Char.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $ItemList = Elm.ItemList.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var watchSignal = function (caption) {
+      return $Signal.map($Debug.watch(caption));
+   };
+   var keyToAction = F2(function (action,key) {
+      var filterTrue = A3($Signal.filter,
+      function (x) {
+         return x;
+      },
+      false,
+      key);
+      return A2($Signal.map,
+      function (x) {
+         return action;
+      },
+      filterTrue);
+   });
+   var keyWithAltRelease = function (key) {
+      return A3($Signal.map2,
+      F2(function (x,y) {
+         return $Basics.not(x) || $Basics.not(y);
+      }),
+      $Keyboard.alt,
+      $Keyboard.isDown($Char.toCode($Char.toUpper(key))));
+   };
+   var toMainSort = A2(keyToAction,
+   $ItemList.MainSort,
+   keyWithAltRelease(_U.chr("s")));
+   var keyWithAlt = function (key) {
+      return A3($Signal.map2,
+      F2(function (x,y) {    return x && y;}),
+      $Keyboard.alt,
+      $Keyboard.isDown($Char.toCode($Char.toUpper(key))));
+   };
+   var toNext = A2(keyToAction,
+   $ItemList.NextFocus,
+   keyWithAlt(_U.chr("j")));
+   var toPrevious = A2(keyToAction,
+   $ItemList.PreviousFocus,
+   keyWithAlt(_U.chr("k")));
+   var toTruncate = A2(keyToAction,
+   $ItemList.TruncateCurrent,
+   keyWithAlt(_U.chr("o")));
+   var toPin = A2(keyToAction,
+   $ItemList.PinCurrent,
+   keyWithAlt(_U.chr("p")));
+   var toDone = A2(keyToAction,
+   $ItemList.DoneCurrent,
+   keyWithAlt(_U.chr("x")));
+   var toAltSort = A2(keyToAction,
+   $ItemList.AltSort,
+   keyWithAlt(_U.chr("s")));
+   var keyboardInput = $Signal.mergeMany(_U.list([toNext
+                                                 ,toPrevious
+                                                 ,toAltSort
+                                                 ,toMainSort
+                                                 ,toTruncate
+                                                 ,toPin
+                                                 ,toDone]));
+   return _elm.KeyboardInput.values = {_op: _op
+                                      ,keyWithAlt: keyWithAlt
+                                      ,keyWithAltRelease: keyWithAltRelease
+                                      ,keyToAction: keyToAction
+                                      ,toNext: toNext
+                                      ,toPrevious: toPrevious
+                                      ,toTruncate: toTruncate
+                                      ,toPin: toPin
+                                      ,toDone: toDone
+                                      ,toAltSort: toAltSort
+                                      ,toMainSort: toMainSort
+                                      ,keyboardInput: keyboardInput
+                                      ,watchSignal: watchSignal};
+};

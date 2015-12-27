@@ -1,0 +1,390 @@
+Elm.ItemList = Elm.ItemList || {};
+Elm.ItemList.make = function (_elm) {
+   "use strict";
+   _elm.ItemList = _elm.ItemList || {};
+   if (_elm.ItemList.values) return _elm.ItemList.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Item = Elm.Item.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Static = Elm.Static.make(_elm);
+   var _op = {};
+   var takeDone$ = function (items) {
+      takeDone$: while (true) {
+         var rest = $List.tail(items);
+         var first = $List.head(items);
+         var _p0 = first;
+         if (_p0.ctor === "Nothing") {
+               return _U.list([]);
+            } else {
+               var _p5 = _p0._0._2;
+               var _p4 = _p0._0._0;
+               var _p3 = _p0._0._1;
+               if (_p5.done) {
+                     var _p1 = rest;
+                     if (_p1.ctor === "Nothing") {
+                           return _U.list([{ctor: "_Tuple3",_0: _p4,_1: _p3,_2: _p5}]);
+                        } else {
+                           return A2($List._op["::"],
+                           {ctor: "_Tuple3",_0: _p4,_1: _p3,_2: _p5},
+                           takeDone$(_p1._0));
+                        }
+                  } else {
+                     var _p2 = rest;
+                     if (_p2.ctor === "Nothing") {
+                           return _U.list([]);
+                        } else {
+                           var _v3 = _p2._0;
+                           items = _v3;
+                           continue takeDone$;
+                        }
+                  }
+            }
+      }
+   };
+   var takeDone = function (model) {
+      return takeDone$(model.items);
+   };
+   var takeTodo$ = function (items) {
+      var rest = $List.tail(items);
+      var first = $List.head(items);
+      var _p6 = first;
+      if (_p6.ctor === "Nothing") {
+            return _U.list([]);
+         } else {
+            var _p10 = _p6._0._2;
+            var _p9 = _p6._0._0;
+            var _p8 = _p6._0._1;
+            if (_p10.done) return _U.list([]); else {
+                  var _p7 = rest;
+                  if (_p7.ctor === "Nothing") {
+                        return _U.list([{ctor: "_Tuple3",_0: _p9,_1: _p8,_2: _p10}]);
+                     } else {
+                        return A2($List._op["::"],
+                        {ctor: "_Tuple3",_0: _p9,_1: _p8,_2: _p10},
+                        takeTodo$(_p7._0));
+                     }
+               }
+         }
+   };
+   var takeTodo = function (model) {
+      return takeTodo$(model.items);
+   };
+   var itemActionCurrent$ = F4(function (acc,
+   focusID,
+   action,
+   itemList) {
+      var rest = $List.tail(itemList);
+      var first = $List.head(itemList);
+      var _p11 = first;
+      if (_p11.ctor === "Nothing") {
+            return _U.list([]);
+         } else {
+            var _p15 = _p11._0._2;
+            var _p14 = _p11._0._0;
+            var _p13 = _p11._0._1;
+            var restList = function () {
+               var _p12 = rest;
+               if (_p12.ctor === "Nothing") {
+                     return _U.list([]);
+                  } else {
+                     return _p12._0;
+                  }
+            }();
+            return _U.eq(acc,focusID) ? A2($List._op["::"],
+            {ctor: "_Tuple3"
+            ,_0: _p14
+            ,_1: _p13
+            ,_2: A2($Item.update,action,_p15)},
+            restList) : A2($List._op["::"],
+            {ctor: "_Tuple3",_0: _p14,_1: _p13,_2: _p15},
+            A4(itemActionCurrent$,acc + 1,focusID,action,restList));
+         }
+   });
+   var currentItem = function (model) {
+      var inList = A2($List.drop,
+      model.focusOn - 1,
+      A2($List.take,model.focusOn,model.items));
+      var theItem = $List.head(inList);
+      var _p16 = theItem;
+      if (_p16.ctor === "Nothing") {
+            return $Item.initReminder({body: "",created: ""});
+         } else {
+            return _p16._0._2;
+         }
+   };
+   var reverseComparison = function (comp) {
+      var _p17 = comp;
+      switch (_p17.ctor)
+      {case "LT": return $Basics.GT;
+         case "GT": return $Basics.LT;
+         default: return $Basics.EQ;}
+   };
+   var compareDates = F2(function (_p19,_p18) {
+      var _p20 = _p19;
+      var _p27 = _p20._0;
+      var _p26 = _p20._1;
+      var _p25 = _p20._2;
+      var _p21 = _p18;
+      var _p24 = _p21._0;
+      var _p23 = _p21._1;
+      var _p22 = _p21._2;
+      return _U.cmp(_p27,_p24) < 0 ? $Basics.LT : _U.cmp(_p27,
+      _p24) > 0 ? $Basics.GT : _U.cmp(_p26,
+      _p23) < 0 ? $Basics.LT : _U.cmp(_p26,
+      _p23) > 0 ? $Basics.GT : _U.cmp(_p25,
+      _p22) < 0 ? $Basics.LT : _U.cmp(_p25,
+      _p22) > 0 ? $Basics.GT : $Basics.EQ;
+   });
+   var altComparison = F2(function (_p29,_p28) {
+      var _p30 = _p29;
+      var _p33 = _p30._2;
+      var _p31 = _p28;
+      var _p32 = _p31._2;
+      if (_p33.done && $Basics.not(_p32.done)) return $Basics.GT;
+      else if ($Basics.not(_p33.done) && _p32.done) return $Basics.LT;
+         else {
+               var tupleTwo = $Item.extractDate(_p32);
+               var tupleOne = $Item.extractDate(_p33);
+               return reverseComparison(A2(compareDates,tupleOne,tupleTwo));
+            }
+   });
+   var mainComparison = F2(function (_p35,_p34) {
+      var _p36 = _p35;
+      var _p39 = _p36._2;
+      var _p37 = _p34;
+      var _p38 = _p37._2;
+      if (_p39.done && $Basics.not(_p38.done)) return $Basics.GT;
+      else if ($Basics.not(_p39.done) && _p38.done) return $Basics.LT;
+         else if (_p39.pinned && $Basics.not(_p38.pinned))
+            return $Basics.LT;
+            else if ($Basics.not(_p39.pinned) && _p38.pinned)
+               return $Basics.GT; else {
+                     var tupleTwo = $Item.extractDate(_p38);
+                     var tupleOne = $Item.extractDate(_p39);
+                     return A2(compareDates,tupleOne,tupleTwo);
+                  }
+   });
+   var fixFocus$ = F3(function (acc,focusID,itemList) {
+      var rest = $List.tail(itemList);
+      var first = $List.head(itemList);
+      var _p40 = first;
+      if (_p40.ctor === "Nothing") {
+            return _U.list([]);
+         } else {
+            var _p43 = _p40._0._2;
+            var _p42 = _p40._0._0;
+            var fixedModel = _U.eq(focusID,acc) ? _U.update(_p43,
+            {focus: true}) : _U.update(_p43,{focus: false});
+            var fixedItem = _U.eq(focusID,_p42) ? {ctor: "_Tuple3"
+                                                  ,_0: _p42
+                                                  ,_1: true
+                                                  ,_2: fixedModel} : {ctor: "_Tuple3"
+                                                                     ,_0: _p42
+                                                                     ,_1: false
+                                                                     ,_2: fixedModel};
+            var _p41 = rest;
+            if (_p41.ctor === "Nothing") {
+                  return _U.list([fixedItem]);
+               } else {
+                  return A2($List._op["::"],
+                  fixedItem,
+                  A3(fixFocus$,acc + 1,focusID,_p41._0));
+               }
+         }
+   });
+   var fixFocus = function (model) {
+      var newList = A3(fixFocus$,0,model.focusOn,model.items);
+      return _U.update(model,{items: newList});
+   };
+   var altSort = function (model) {
+      var newModel = _U.update(model,
+      {items: A2($List.sortWith,altComparison,model.items)});
+      return fixFocus(newModel);
+   };
+   var mainSort = function (model) {
+      var newModel = _U.update(model,
+      {items: A2($List.sortWith,mainComparison,model.items)});
+      return fixFocus(newModel);
+   };
+   var itemActionCurrent = F2(function (action,model) {
+      var newItems = A4(itemActionCurrent$,
+      0,
+      model.focusOn,
+      action,
+      model.items);
+      var newModel = _U.update(model,{items: newItems});
+      return newModel.altSort ? altSort(newModel) : mainSort(newModel);
+   });
+   var update = F2(function (action,model) {
+      var _p44 = action;
+      switch (_p44.ctor)
+      {case "AddReminder":
+         var reminderModel = $Item.initReminder(_p44._0);
+           var newModel = {items: A2($List._op["::"],
+                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: reminderModel},
+                          model.items)
+                          ,nextID: model.nextID + 1
+                          ,focusOn: model.focusOn
+                          ,altSort: model.altSort};
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
+         case "AddEmail": var emailModel = $Item.initEmail(_p44._0);
+           var newModel = {items: A2($List._op["::"],
+                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: emailModel},
+                          model.items)
+                          ,nextID: model.nextID + 1
+                          ,focusOn: model.focusOn
+                          ,altSort: model.altSort};
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
+         case "NextFocus": var nextFocus = A2($Basics._op["%"],
+           model.focusOn + 1,
+           $List.length(model.items));
+           var newModel = {items: model.items
+                          ,nextID: model.nextID
+                          ,focusOn: nextFocus
+                          ,altSort: model.altSort};
+           return fixFocus(newModel);
+         case "PreviousFocus": var nextFocus = _U.cmp(model.focusOn - 1,
+           0) < 0 ? _U.eq($List.length(model.items),
+           0) ? 0 : $List.length(model.items) - 1 : model.focusOn - 1;
+           var newModel = {items: model.items
+                          ,nextID: model.nextID
+                          ,focusOn: nextFocus
+                          ,altSort: model.altSort};
+           return fixFocus(newModel);
+         case "Modify": var updateModel = function (_p45) {
+              var _p46 = _p45;
+              var _p49 = _p46._0;
+              var _p48 = _p46._2;
+              var _p47 = _p46._1;
+              return _U.eq(_p49,_p44._0) ? {ctor: "_Tuple3"
+                                           ,_0: _p49
+                                           ,_1: _p47
+                                           ,_2: A2($Item.update,_p44._1,_p48)} : {ctor: "_Tuple3"
+                                                                                 ,_0: _p49
+                                                                                 ,_1: _p47
+                                                                                 ,_2: _p48};
+           };
+           var newModel = {items: A2($List.map,updateModel,model.items)
+                          ,nextID: model.nextID
+                          ,focusOn: model.focusOn
+                          ,altSort: model.altSort};
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
+         case "AltSort": var newModel = _U.update(model,{altSort: true});
+           return altSort(newModel);
+         case "MainSort": var newModel = _U.update(model,
+           {altSort: false});
+           return mainSort(newModel);
+         case "FixFocus": return fixFocus(model);
+         case "TruncateCurrent": var curr = currentItem(model);
+           return curr.truncated ? A2(itemActionCurrent,
+           $Item.More,
+           model) : A2(itemActionCurrent,$Item.Less,model);
+         case "PinCurrent": var curr = currentItem(model);
+           return curr.pinned ? A2(itemActionCurrent,
+           $Item.Unpin,
+           model) : A2(itemActionCurrent,$Item.Pin,model);
+         case "DoneCurrent": var curr = currentItem(model);
+           return curr.done ? A2(itemActionCurrent,
+           $Item.Undo,
+           model) : A2(itemActionCurrent,$Item.Do,model);
+         default: return model;}
+   });
+   var DoneCurrent = {ctor: "DoneCurrent"};
+   var PinCurrent = {ctor: "PinCurrent"};
+   var TruncateCurrent = {ctor: "TruncateCurrent"};
+   var NoOp = {ctor: "NoOp"};
+   var FixFocus = {ctor: "FixFocus"};
+   var MainSort = {ctor: "MainSort"};
+   var AltSort = {ctor: "AltSort"};
+   var Modify = F2(function (a,b) {
+      return {ctor: "Modify",_0: a,_1: b};
+   });
+   var viewItem = F2(function (address,_p50) {
+      var _p51 = _p50;
+      return A2($Item.view,
+      A2($Signal.forwardTo,address,Modify(_p51._0)),
+      _p51._2);
+   });
+   var genDiv = F2(function (address,_p52) {
+      var _p53 = _p52;
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2(viewItem,
+      address,
+      {ctor: "_Tuple3",_0: _p53._0,_1: _p53._1,_2: _p53._2})]));
+   });
+   var view = F2(function (address,model) {
+      var dones = takeDone(model);
+      var doneHtml = A2($List.map,genDiv(address),dones);
+      var todos = takeTodo(model);
+      var todoHtml = A2($List.map,genDiv(address),todos);
+      return A2($Html.div,
+      _U.list([]),
+      A2($List.append,
+      A2($List.append,
+      A2($List.append,
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h1,
+      _U.list([]),
+      _U.list([$Html.text("Todo")]))]))]),
+      todoHtml),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h1,
+      _U.list([]),
+      _U.list([$Html.text("Done")]))]))])),
+      doneHtml));
+   });
+   var PreviousFocus = {ctor: "PreviousFocus"};
+   var NextFocus = {ctor: "NextFocus"};
+   var AddEmail = function (a) {
+      return {ctor: "AddEmail",_0: a};
+   };
+   var AddReminder = function (a) {
+      return {ctor: "AddReminder",_0: a};
+   };
+   var initEmpty = {items: _U.list([])
+                   ,nextID: 0
+                   ,focusOn: 0
+                   ,altSort: false};
+   var init = function () {
+      var addEmails = A2($List.map,AddEmail,$Static.emails);
+      var addReminders = A2($List.map,AddReminder,$Static.reminders);
+      var updates = A2($List.append,addReminders,addEmails);
+      return A3($List.foldl,update,initEmpty,updates);
+   }();
+   var Model = F4(function (a,b,c,d) {
+      return {items: a,nextID: b,focusOn: c,altSort: d};
+   });
+   var actionMailBox = $Signal.mailbox(NoOp);
+   var actions = actionMailBox.signal;
+   var actionAddress = actionMailBox.address;
+   var state = A3($Signal.foldp,update,init,actions);
+   return _elm.ItemList.values = {_op: _op
+                                 ,init: init
+                                 ,update: update
+                                 ,view: view
+                                 ,actions: actions
+                                 ,actionAddress: actionAddress
+                                 ,state: state
+                                 ,Model: Model
+                                 ,AddReminder: AddReminder
+                                 ,AddEmail: AddEmail
+                                 ,NextFocus: NextFocus
+                                 ,PreviousFocus: PreviousFocus
+                                 ,Modify: Modify
+                                 ,AltSort: AltSort
+                                 ,MainSort: MainSort
+                                 ,FixFocus: FixFocus
+                                 ,NoOp: NoOp
+                                 ,TruncateCurrent: TruncateCurrent
+                                 ,PinCurrent: PinCurrent
+                                 ,DoneCurrent: DoneCurrent};
+};
