@@ -4,6 +4,7 @@ Elm.ItemList.make = function (_elm) {
    _elm.ItemList = _elm.ItemList || {};
    if (_elm.ItemList.values) return _elm.ItemList.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $AddReminder = Elm.AddReminder.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
@@ -221,80 +222,6 @@ Elm.ItemList.make = function (_elm) {
       var newModel = _U.update(model,{items: newItems});
       return newModel.altSort ? altSort(newModel) : mainSort(newModel);
    });
-   var update = F2(function (action,model) {
-      var _p44 = action;
-      switch (_p44.ctor)
-      {case "AddReminder":
-         var reminderModel = $Item.initReminder(_p44._0);
-           var newModel = {items: A2($List._op["::"],
-                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: reminderModel},
-                          model.items)
-                          ,nextID: model.nextID + 1
-                          ,focusOn: model.focusOn
-                          ,altSort: model.altSort};
-           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "AddEmail": var emailModel = $Item.initEmail(_p44._0);
-           var newModel = {items: A2($List._op["::"],
-                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: emailModel},
-                          model.items)
-                          ,nextID: model.nextID + 1
-                          ,focusOn: model.focusOn
-                          ,altSort: model.altSort};
-           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "NextFocus": var nextFocus = A2($Basics._op["%"],
-           model.focusOn + 1,
-           $List.length(model.items));
-           var newModel = {items: model.items
-                          ,nextID: model.nextID
-                          ,focusOn: nextFocus
-                          ,altSort: model.altSort};
-           return fixFocus(newModel);
-         case "PreviousFocus": var nextFocus = _U.cmp(model.focusOn - 1,
-           0) < 0 ? _U.eq($List.length(model.items),
-           0) ? 0 : $List.length(model.items) - 1 : model.focusOn - 1;
-           var newModel = {items: model.items
-                          ,nextID: model.nextID
-                          ,focusOn: nextFocus
-                          ,altSort: model.altSort};
-           return fixFocus(newModel);
-         case "Modify": var updateModel = function (_p45) {
-              var _p46 = _p45;
-              var _p49 = _p46._0;
-              var _p48 = _p46._2;
-              var _p47 = _p46._1;
-              return _U.eq(_p49,_p44._0) ? {ctor: "_Tuple3"
-                                           ,_0: _p49
-                                           ,_1: _p47
-                                           ,_2: A2($Item.update,_p44._1,_p48)} : {ctor: "_Tuple3"
-                                                                                 ,_0: _p49
-                                                                                 ,_1: _p47
-                                                                                 ,_2: _p48};
-           };
-           var newModel = {items: A2($List.map,updateModel,model.items)
-                          ,nextID: model.nextID
-                          ,focusOn: model.focusOn
-                          ,altSort: model.altSort};
-           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "AltSort": var newModel = _U.update(model,{altSort: true});
-           return altSort(newModel);
-         case "MainSort": var newModel = _U.update(model,
-           {altSort: false});
-           return mainSort(newModel);
-         case "FixFocus": return fixFocus(model);
-         case "TruncateCurrent": var curr = currentItem(model);
-           return curr.truncated ? A2(itemActionCurrent,
-           $Item.More,
-           model) : A2(itemActionCurrent,$Item.Less,model);
-         case "PinCurrent": var curr = currentItem(model);
-           return curr.pinned ? A2(itemActionCurrent,
-           $Item.Unpin,
-           model) : A2(itemActionCurrent,$Item.Pin,model);
-         case "DoneCurrent": var curr = currentItem(model);
-           return curr.done ? A2(itemActionCurrent,
-           $Item.Undo,
-           model) : A2(itemActionCurrent,$Item.Do,model);
-         default: return model;}
-   });
    var DoneCurrent = {ctor: "DoneCurrent"};
    var PinCurrent = {ctor: "PinCurrent"};
    var TruncateCurrent = {ctor: "TruncateCurrent"};
@@ -302,30 +229,37 @@ Elm.ItemList.make = function (_elm) {
    var FixFocus = {ctor: "FixFocus"};
    var MainSort = {ctor: "MainSort"};
    var AltSort = {ctor: "AltSort"};
+   var ModifyAddReminder = function (a) {
+      return {ctor: "ModifyAddReminder",_0: a};
+   };
    var Modify = F2(function (a,b) {
       return {ctor: "Modify",_0: a,_1: b};
    });
-   var viewItem = F2(function (address,_p50) {
-      var _p51 = _p50;
+   var viewItem = F2(function (address,_p44) {
+      var _p45 = _p44;
       return A2($Item.view,
-      A2($Signal.forwardTo,address,Modify(_p51._0)),
-      _p51._2);
+      A2($Signal.forwardTo,address,Modify(_p45._0)),
+      _p45._2);
    });
-   var genDiv = F2(function (address,_p52) {
-      var _p53 = _p52;
+   var genDiv = F2(function (address,_p46) {
+      var _p47 = _p46;
       return A2($Html.div,
       _U.list([]),
       _U.list([A2(viewItem,
       address,
-      {ctor: "_Tuple3",_0: _p53._0,_1: _p53._1,_2: _p53._2})]));
+      {ctor: "_Tuple3",_0: _p47._0,_1: _p47._1,_2: _p47._2})]));
    });
    var view = F2(function (address,model) {
+      var addReminderView = A2($AddReminder.view,
+      A2($Signal.forwardTo,address,ModifyAddReminder),
+      model.addReminder);
       var dones = takeDone(model);
       var doneHtml = A2($List.map,genDiv(address),dones);
       var todos = takeTodo(model);
       var todoHtml = A2($List.map,genDiv(address),todos);
       return A2($Html.div,
       _U.list([]),
+      A2($List.append,
       A2($List.append,
       A2($List.append,
       A2($List.append,
@@ -340,7 +274,10 @@ Elm.ItemList.make = function (_elm) {
       _U.list([A2($Html.h1,
       _U.list([]),
       _U.list([$Html.text("Done")]))]))])),
-      doneHtml));
+      doneHtml),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([addReminderView]))])));
    });
    var PreviousFocus = {ctor: "PreviousFocus"};
    var NextFocus = {ctor: "NextFocus"};
@@ -350,9 +287,97 @@ Elm.ItemList.make = function (_elm) {
    var AddReminder = function (a) {
       return {ctor: "AddReminder",_0: a};
    };
+   var update = F2(function (action,model) {
+      var _p48 = action;
+      switch (_p48.ctor)
+      {case "AddReminder":
+         var reminderModel = $Item.initReminder(_p48._0);
+           var newModel = {items: A2($List._op["::"],
+                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: reminderModel},
+                          model.items)
+                          ,nextID: model.nextID + 1
+                          ,focusOn: model.focusOn
+                          ,addReminder: model.addReminder
+                          ,altSort: model.altSort};
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
+         case "AddEmail": var emailModel = $Item.initEmail(_p48._0);
+           var newModel = {items: A2($List._op["::"],
+                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: emailModel},
+                          model.items)
+                          ,nextID: model.nextID + 1
+                          ,focusOn: model.focusOn
+                          ,addReminder: model.addReminder
+                          ,altSort: model.altSort};
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
+         case "NextFocus": var nextFocus = A2($Basics._op["%"],
+           model.focusOn + 1,
+           $List.length(model.items));
+           var newModel = {items: model.items
+                          ,nextID: model.nextID
+                          ,focusOn: nextFocus
+                          ,addReminder: model.addReminder
+                          ,altSort: model.altSort};
+           return fixFocus(newModel);
+         case "PreviousFocus": var nextFocus = _U.cmp(model.focusOn - 1,
+           0) < 0 ? _U.eq($List.length(model.items),
+           0) ? 0 : $List.length(model.items) - 1 : model.focusOn - 1;
+           var newModel = {items: model.items
+                          ,nextID: model.nextID
+                          ,focusOn: nextFocus
+                          ,addReminder: model.addReminder
+                          ,altSort: model.altSort};
+           return fixFocus(newModel);
+         case "Modify": var updateModel = function (_p49) {
+              var _p50 = _p49;
+              var _p53 = _p50._0;
+              var _p52 = _p50._2;
+              var _p51 = _p50._1;
+              return _U.eq(_p53,_p48._0) ? {ctor: "_Tuple3"
+                                           ,_0: _p53
+                                           ,_1: _p51
+                                           ,_2: A2($Item.update,_p48._1,_p52)} : {ctor: "_Tuple3"
+                                                                                 ,_0: _p53
+                                                                                 ,_1: _p51
+                                                                                 ,_2: _p52};
+           };
+           var newModel = {items: A2($List.map,updateModel,model.items)
+                          ,nextID: model.nextID
+                          ,focusOn: model.focusOn
+                          ,addReminder: model.addReminder
+                          ,altSort: model.altSort};
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
+         case "ModifyAddReminder": var _p55 = _p48._0;
+           var updatedModel = function () {
+              var _p54 = _p55;
+              if (_p54.ctor === "AddReminder") {
+                    return A2(update,AddReminder(_p54._0),model);
+                 } else {
+                    return model;
+                 }
+           }();
+           var updatedAddReminder = A2($AddReminder.update,
+           _p55,
+           model.addReminder);
+           return _U.update(updatedModel,
+           {addReminder: updatedAddReminder});
+         case "AltSort": var newModel = _U.update(model,{altSort: true});
+           return altSort(newModel);
+         case "MainSort": var newModel = _U.update(model,
+           {altSort: false});
+           return mainSort(newModel);
+         case "FixFocus": return fixFocus(model);
+         case "TruncateCurrent": var curr = currentItem(model);
+           return A2(itemActionCurrent,$Item.ToggleTruncate,model);
+         case "PinCurrent": var curr = currentItem(model);
+           return A2(itemActionCurrent,$Item.TogglePin,model);
+         case "DoneCurrent": var curr = currentItem(model);
+           return A2(itemActionCurrent,$Item.ToggleDo,model);
+         default: return model;}
+   });
    var initEmpty = {items: _U.list([])
                    ,nextID: 0
                    ,focusOn: 0
+                   ,addReminder: $AddReminder.init
                    ,altSort: false};
    var init = function () {
       var addEmails = A2($List.map,AddEmail,$Static.emails);
@@ -360,8 +385,12 @@ Elm.ItemList.make = function (_elm) {
       var updates = A2($List.append,addReminders,addEmails);
       return A3($List.foldl,update,initEmpty,updates);
    }();
-   var Model = F4(function (a,b,c,d) {
-      return {items: a,nextID: b,focusOn: c,altSort: d};
+   var Model = F5(function (a,b,c,d,e) {
+      return {items: a
+             ,nextID: b
+             ,focusOn: c
+             ,addReminder: d
+             ,altSort: e};
    });
    var actionMailBox = $Signal.mailbox(NoOp);
    var actions = actionMailBox.signal;
@@ -380,6 +409,7 @@ Elm.ItemList.make = function (_elm) {
                                  ,NextFocus: NextFocus
                                  ,PreviousFocus: PreviousFocus
                                  ,Modify: Modify
+                                 ,ModifyAddReminder: ModifyAddReminder
                                  ,AltSort: AltSort
                                  ,MainSort: MainSort
                                  ,FixFocus: FixFocus

@@ -168,12 +168,9 @@ monthToInt month =
 -- UPDATE
 
 type Action
-  = Do
-  | Undo
-  | Pin
-  | Unpin
-  | More
-  | Less
+  = ToggleDo
+  | TogglePin
+  | ToggleTruncate
   {--}
   | NoOp
   --}
@@ -181,30 +178,33 @@ type Action
 update : Action -> Model -> Model
 update action model =
   case action of
-    Do ->
-      { model |
-          done = True
-      }
-    Undo ->
-      { model |
-          done = False
-      }
-    Pin ->
-      { model |
-          pinned = True
-      }
-    Unpin ->
-      { model |
-          pinned = False
-      }
-    More ->
-      { model |
-          truncated = False
-      }
-    Less ->
-      { model |
-          truncated = True
-      }
+    ToggleDo ->
+      if model.done then
+        { model |
+            done = False
+        }
+      else
+        { model |
+            done = True
+        }
+    TogglePin ->
+      if model.pinned then
+        { model |
+            pinned = False
+        }
+      else
+        { model |
+            pinned = True
+        }
+    ToggleTruncate ->
+      if model.truncated then
+        { model |
+            truncated = False
+        }
+      else
+        { model |
+            truncated = True
+        }
     {--}
     NoOp ->
       model
@@ -289,23 +289,23 @@ borderStyle =
 moreLessButton : Signal.Address Action -> Model -> Html
 moreLessButton address model =
   if model.truncated then
-    button [ onClick address More ] [ text "More" ]
+    button [ onClick address ToggleTruncate ] [ text "More" ]
   else
-    button [ onClick address Less ] [ text "Less" ]
+    button [ onClick address ToggleTruncate ] [ text "Less" ]
 
 doUndoButton : Signal.Address Action -> Model -> Html
 doUndoButton address model =
   if model.done then
-    button [ onClick address Undo ] [ text "Undo" ]
+    button [ onClick address ToggleDo ] [ text "Undo" ]
   else
-    button [ onClick address Do ] [ text "Do" ]
+    button [ onClick address ToggleDo ] [ text "Do" ]
 
 pinUnpinButton : Signal.Address Action -> Model -> Html
 pinUnpinButton address model =
   if model.pinned then
-    button [ onClick address Unpin ] [ text "Unpin" ]
+    button [ onClick address TogglePin ] [ text "Unpin" ]
   else
-    button [ onClick address Pin ] [ text "Pin" ]
+    button [ onClick address TogglePin ] [ text "Pin" ]
 
 showEmailBodyTrunc : Model -> String
 showEmailBodyTrunc model =

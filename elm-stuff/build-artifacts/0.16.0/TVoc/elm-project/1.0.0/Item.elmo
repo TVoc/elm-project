@@ -29,40 +29,37 @@ Elm.Item.make = function (_elm) {
    var update = F2(function (action,model) {
       var _p0 = action;
       switch (_p0.ctor)
-      {case "Do": return _U.update(model,{done: true});
-         case "Undo": return _U.update(model,{done: false});
-         case "Pin": return _U.update(model,{pinned: true});
-         case "Unpin": return _U.update(model,{pinned: false});
-         case "More": return _U.update(model,{truncated: false});
-         case "Less": return _U.update(model,{truncated: true});
+      {case "ToggleDo": return model.done ? _U.update(model,
+           {done: false}) : _U.update(model,{done: true});
+         case "TogglePin": return model.pinned ? _U.update(model,
+           {pinned: false}) : _U.update(model,{pinned: true});
+         case "ToggleTruncate": return model.truncated ? _U.update(model,
+           {truncated: false}) : _U.update(model,{truncated: true});
          default: return model;}
    });
    var NoOp = {ctor: "NoOp"};
-   var Less = {ctor: "Less"};
-   var More = {ctor: "More"};
+   var ToggleTruncate = {ctor: "ToggleTruncate"};
    var moreLessButton = F2(function (address,model) {
       return model.truncated ? A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,More)]),
+      _U.list([A2($Html$Events.onClick,address,ToggleTruncate)]),
       _U.list([$Html.text("More")])) : A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,Less)]),
+      _U.list([A2($Html$Events.onClick,address,ToggleTruncate)]),
       _U.list([$Html.text("Less")]));
    });
-   var Unpin = {ctor: "Unpin"};
-   var Pin = {ctor: "Pin"};
+   var TogglePin = {ctor: "TogglePin"};
    var pinUnpinButton = F2(function (address,model) {
       return model.pinned ? A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,Unpin)]),
+      _U.list([A2($Html$Events.onClick,address,TogglePin)]),
       _U.list([$Html.text("Unpin")])) : A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,Pin)]),
+      _U.list([A2($Html$Events.onClick,address,TogglePin)]),
       _U.list([$Html.text("Pin")]));
    });
-   var Undo = {ctor: "Undo"};
-   var Do = {ctor: "Do"};
+   var ToggleDo = {ctor: "ToggleDo"};
    var doUndoButton = F2(function (address,model) {
       return model.done ? A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,Undo)]),
+      _U.list([A2($Html$Events.onClick,address,ToggleDo)]),
       _U.list([$Html.text("Undo")])) : A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,Do)]),
+      _U.list([A2($Html$Events.onClick,address,ToggleDo)]),
       _U.list([$Html.text("Do")]));
    });
    var monthToInt = function (month) {
@@ -279,11 +276,8 @@ Elm.Item.make = function (_elm) {
                              ,extractDate: extractDate
                              ,extractTitle: extractTitle
                              ,Model: Model
-                             ,Do: Do
-                             ,Undo: Undo
-                             ,Pin: Pin
-                             ,Unpin: Unpin
-                             ,More: More
-                             ,Less: Less
+                             ,ToggleDo: ToggleDo
+                             ,TogglePin: TogglePin
+                             ,ToggleTruncate: ToggleTruncate
                              ,NoOp: NoOp};
 };

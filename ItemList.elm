@@ -4,6 +4,7 @@ import Html exposing (..)
 import Static
 import Item
 import Html.Attributes exposing (..)
+import AddReminder
 
 {--}
 -- MAIN
@@ -30,6 +31,7 @@ type alias Model =
   { items : List (ID, Bool, Item.Model)
   , nextID : Int
   , focusOn : Int
+  , addReminder : AddReminder.Model
   , altSort : Bool
   }
 
@@ -53,6 +55,7 @@ initEmpty =
   { items = []
   , nextID = 0
   , focusOn = 0
+  , addReminder = AddReminder.init
   , altSort = False
   }
 
@@ -131,6 +134,7 @@ type Action
   | NextFocus
   | PreviousFocus
   | Modify ID Item.Action
+  | ModifyAddReminder AddReminder.Action
   | AltSort
   | MainSort
   {--}
@@ -151,6 +155,7 @@ update action model =
           { items = (model.nextID, False, reminderModel) :: model.items
           , nextID = model.nextID + 1
           , focusOn = model.focusOn
+          , addReminder = model.addReminder
           , altSort = model.altSort
           }
       in
@@ -165,6 +170,7 @@ update action model =
           { items = (model.nextID, False, emailModel) :: model.items
           , nextID = model.nextID + 1
           , focusOn = model.focusOn
+          , addReminder = model.addReminder
           , altSort = model.altSort
           }
       in
@@ -179,6 +185,7 @@ update action model =
           { items = model.items
           , nextID = model.nextID
           , focusOn = nextFocus
+          , addReminder = model.addReminder
           , altSort = model.altSort
           }
       in
@@ -197,6 +204,7 @@ update action model =
           { items = model.items
           , nextID = model.nextID
           , focusOn = nextFocus
+          , addReminder = model.addReminder
           , altSort = model.altSort
           }
       in
@@ -212,6 +220,7 @@ update action model =
           { items = List.map updateModel model.items
           , nextID = model.nextID
           , focusOn = model.focusOn
+          , addReminder = model.addReminder
           , altSort = model.altSort
           }
       in
@@ -219,6 +228,19 @@ update action model =
           altSort newModel
         else
           mainSort newModel
+    ModifyAddReminder addReminderAction ->
+      let
+        updatedAddReminder = AddReminder.update addReminderAction model.addReminder
+        updatedModel =
+          case addReminderAction of
+            AddReminder.AddReminder reminder ->
+              update (AddReminder reminder) model
+            _ ->
+              model
+      in
+        { updatedModel |
+            addReminder = updatedAddReminder
+        }
     AltSort ->
       let
         newModel =
@@ -242,27 +264,18 @@ update action model =
       let
         curr = currentItem model
       in
-        if curr.truncated then
-          itemActionCurrent Item.More model
-        else
-          itemActionCurrent Item.Less model
+        itemActionCurrent Item.ToggleTruncate model
     PinCurrent ->
       let
         curr = currentItem model
       in
-        if curr.pinned then
-          itemActionCurrent Item.Unpin model
-        else
-          itemActionCurrent Item.Pin model
+        itemActionCurrent Item.TogglePin model
     DoneCurrent ->
       let
         curr =
           currentItem model
       in
-        if curr.done then
-          itemActionCurrent Item.Undo model
-        else
-          itemActionCurrent Item.Do model
+        itemActionCurrent Item.ToggleDo model
     NoOp ->
       model
     --}
@@ -445,6 +458,8 @@ view address model =
     dones = takeDone model
     todoHtml = List.map (genDiv address) todos
     doneHtml = List.map (genDiv address) dones
+    addReminderView =
+      AddReminder.view (Signal.forwardTo address ModifyAddReminder) model.addReminder
   in
     div []
       ( [div [] [Html.h1 [] [Html.text "Todo"]]]
@@ -454,6 +469,8 @@ view address model =
         [div [] [Html.h1 [] [Html.text "Done"]]]
         `List.append`
         doneHtml
+        `List.append`
+        [div [] [addReminderView]]
       )
 
 genDiv : Signal.Address Action -> (ID, Bool, Item.Model) -> Html

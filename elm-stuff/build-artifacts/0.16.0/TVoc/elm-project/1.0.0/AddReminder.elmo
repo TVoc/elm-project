@@ -1,0 +1,87 @@
+Elm.AddReminder = Elm.AddReminder || {};
+Elm.AddReminder.make = function (_elm) {
+   "use strict";
+   _elm.AddReminder = _elm.AddReminder || {};
+   if (_elm.AddReminder.values) return _elm.AddReminder.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var fieldInput = F4(function (fieldType,
+   address,
+   toAction,
+   content) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,_U.list([]),_U.list([]))
+              ,A2($Html.input,
+              _U.list([$Html$Attributes.type$(fieldType)
+                      ,$Html$Attributes.value(content)
+                      ,A3($Html$Events.on,
+                      "input",
+                      $Html$Events.targetValue,
+                      function (string) {
+                         return A2($Signal.message,address,toAction(string));
+                      })]),
+              _U.list([]))]));
+   });
+   var NoOp = {ctor: "NoOp"};
+   var AddReminder = function (a) {
+      return {ctor: "AddReminder",_0: a};
+   };
+   var submitButton = F2(function (address,model) {
+      return A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,AddReminder(model))]),
+      _U.list([$Html.text("Add")]));
+   });
+   var ChangeCreated = function (a) {
+      return {ctor: "ChangeCreated",_0: a};
+   };
+   var ChangeBody = function (a) {
+      return {ctor: "ChangeBody",_0: a};
+   };
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A4(fieldInput,"text",address,ChangeBody,model.body)
+              ,A4(fieldInput,"date",address,ChangeCreated,model.created)
+              ,A2(submitButton,address,model)]))]));
+   });
+   var reminderMailBox = $Signal.mailbox(NoOp);
+   var reminderAddress = reminderMailBox.address;
+   var reminderActions = reminderMailBox.signal;
+   var init = {body: "",created: "2015-01-01"};
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "ChangeBody": return _U.update(model,{body: _p0._0});
+         case "ChangeCreated": return _U.update(model,{created: _p0._0});
+         case "AddReminder": return init;
+         default: return model;}
+   });
+   var state = A3($Signal.foldp,update,init,reminderActions);
+   var Model = F2(function (a,b) {
+      return {body: a,created: b};
+   });
+   return _elm.AddReminder.values = {_op: _op
+                                    ,init: init
+                                    ,view: view
+                                    ,reminderActions: reminderActions
+                                    ,reminderAddress: reminderAddress
+                                    ,state: state
+                                    ,update: update
+                                    ,Model: Model
+                                    ,ChangeBody: ChangeBody
+                                    ,ChangeCreated: ChangeCreated
+                                    ,AddReminder: AddReminder
+                                    ,NoOp: NoOp};
+};

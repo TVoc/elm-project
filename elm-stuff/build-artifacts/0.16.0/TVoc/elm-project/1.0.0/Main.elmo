@@ -4,6 +4,7 @@ Elm.Main.make = function (_elm) {
    _elm.Main = _elm.Main || {};
    if (_elm.Main.values) return _elm.Main.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $AddReminder = Elm.AddReminder.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
@@ -14,16 +15,44 @@ Elm.Main.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var addReminderToListAction = function () {
+      var extractReminder = function (action) {
+         var _p0 = action;
+         if (_p0.ctor === "AddReminder") {
+               return $ItemList.AddReminder(_p0._0);
+            } else {
+               return $ItemList.NoOp;
+            }
+      };
+      var filterAdd = function (action) {
+         var _p1 = action;
+         if (_p1.ctor === "AddReminder") {
+               return true;
+            } else {
+               return false;
+            }
+      };
+      return A2($Signal.map,
+      extractReminder,
+      A3($Signal.filter,
+      filterAdd,
+      $AddReminder.NoOp,
+      $AddReminder.reminderActions));
+   }();
    var itemListState = A3($Signal.foldp,
    $ItemList.update,
    $ItemList.init,
-   A2($Signal.merge,
-   $ItemList.actions,
-   $KeyboardInput.keyboardInput));
-   var main = A2($Signal.map,
-   $ItemList.view($ItemList.actionAddress),
-   itemListState);
+   $Signal.mergeMany(_U.list([addReminderToListAction
+                             ,$ItemList.actions
+                             ,$KeyboardInput.keyboardInput])));
+   var main = function () {
+      var viewFeed = A2($Signal.map,
+      $ItemList.view($ItemList.actionAddress),
+      itemListState);
+      return viewFeed;
+   }();
    return _elm.Main.values = {_op: _op
                              ,main: main
-                             ,itemListState: itemListState};
+                             ,itemListState: itemListState
+                             ,addReminderToListAction: addReminderToListAction};
 };

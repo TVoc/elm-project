@@ -1,9 +1,10 @@
 module Main where
 
-import Html exposing ( Html )
+import Html exposing (..)
 import ItemList
 import Signal
 import KeyboardInput
+import AddReminder
 
 -- Name:
 -- Student ID:
@@ -64,9 +65,44 @@ import KeyboardInput
 
 {--}
 main : Signal Html.Html
-main = Signal.map (ItemList.view ItemList.actionAddress) itemListState
+main =
+  let
+    viewFeed =
+      Signal.map (ItemList.view ItemList.actionAddress) itemListState
+  in
+    viewFeed
+--}
 
 itemListState : Signal ItemList.Model
 itemListState =
-  Signal.foldp ItemList.update ItemList.init (Signal.merge ItemList.actions KeyboardInput.keyboardInput)
+  Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [addReminderToListAction, ItemList.actions, KeyboardInput.keyboardInput])
+
+addReminderToListAction : Signal ItemList.Action
+addReminderToListAction =
+  let
+    filterAdd action =
+      case action of
+        AddReminder.AddReminder _ ->
+          True
+        _ ->
+          False
+    extractReminder action =
+      case action of
+        AddReminder.AddReminder model ->
+          ItemList.AddReminder model
+        _ ->
+          ItemList.NoOp
+  in
+  Signal.map extractReminder  <| Signal.filter filterAdd AddReminder.NoOp AddReminder.reminderActions
+
+{--
+view : Html
+view =
+  let
+    viewItemList =
+      ItemList.view ItemList.actionAddress ItemList.init
+    viewAddReminder =
+      AddReminder.view AddReminder.reminderAddress AddReminder.init
+  in
+    div [] [viewItemList, viewAddReminder]
 --}
