@@ -11321,172 +11321,7 @@ Elm.Html.Events.make = function (_elm) {
                                     ,targetChecked: targetChecked
                                     ,keyCode: keyCode
                                     ,Options: Options};
-};Elm.AddReminder = Elm.AddReminder || {};
-Elm.AddReminder.make = function (_elm) {
-   "use strict";
-   _elm.AddReminder = _elm.AddReminder || {};
-   if (_elm.AddReminder.values) return _elm.AddReminder.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var fieldInput = F4(function (fieldType,
-   address,
-   toAction,
-   content) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,_U.list([]),_U.list([]))
-              ,A2($Html.input,
-              _U.list([$Html$Attributes.type$(fieldType)
-                      ,$Html$Attributes.value(content)
-                      ,A3($Html$Events.on,
-                      "input",
-                      $Html$Events.targetValue,
-                      function (string) {
-                         return A2($Signal.message,address,toAction(string));
-                      })]),
-              _U.list([]))]));
-   });
-   var takeOutput = function (model) {
-      return {body: model.body
-             ,created: model.created
-             ,deadline: model.deadline};
-   };
-   var NoOp = {ctor: "NoOp"};
-   var ToggleHide = {ctor: "ToggleHide"};
-   var hideButton = F2(function (address,model) {
-      return model.hide ? A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
-      _U.list([$Html.text("Unhide Add Reminder")])) : A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
-      _U.list([$Html.text("Hide")]));
-   });
-   var AddReminder = F2(function (a,b) {
-      return {ctor: "AddReminder",_0: a,_1: b};
-   });
-   var submitButton = F2(function (address,model) {
-      return A2($Html.button,
-      _U.list([A2($Html$Events.onClick,
-      address,
-      A2(AddReminder,takeOutput(model),model.hide))]),
-      _U.list([$Html.text("Add")]));
-   });
-   var ChangeDeadline = function (a) {
-      return {ctor: "ChangeDeadline",_0: a};
-   };
-   var ChangeCreated = function (a) {
-      return {ctor: "ChangeCreated",_0: a};
-   };
-   var ChangeBody = function (a) {
-      return {ctor: "ChangeBody",_0: a};
-   };
-   var view = F2(function (address,model) {
-      return model.hide ? A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,
-      _U.list([]),
-      _U.list([A2(hideButton,address,model)]))])) : A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,
-              _U.list([]),
-              _U.list([$Html.text("Reminder: ")
-                      ,A4(fieldInput,"text",address,ChangeBody,model.body)]))
-              ,A2($Html.div,
-              _U.list([]),
-              _U.list([$Html.text("Created: ")
-                      ,A4(fieldInput,"date",address,ChangeCreated,model.created)]))
-              ,A2($Html.div,
-              _U.list([]),
-              _U.list([$Html.text("Deadline: ")
-                      ,A4(fieldInput,"date",address,ChangeDeadline,model.deadline)]))
-              ,A2(submitButton,address,model)
-              ,A2(hideButton,address,model)]))]));
-   });
-   var init = function (hideIt) {
-      return {body: ""
-             ,created: "2015-01-01"
-             ,deadline: "2015-01-02"
-             ,hide: hideIt};
-   };
-   var update = F2(function (action,model) {
-      var _p0 = action;
-      switch (_p0.ctor)
-      {case "ChangeBody": return _U.update(model,{body: _p0._0});
-         case "ChangeCreated": return _U.update(model,{created: _p0._0});
-         case "ChangeDeadline": return _U.update(model,
-           {deadline: _p0._0});
-         case "AddReminder": return init(_p0._1);
-         case "ToggleHide": var notHide = $Basics.not(model.hide);
-           return _U.update(model,{hide: notHide});
-         default: return model;}
-   });
-   var Output = F3(function (a,b,c) {
-      return {body: a,created: b,deadline: c};
-   });
-   var Model = F4(function (a,b,c,d) {
-      return {body: a,created: b,deadline: c,hide: d};
-   });
-   return _elm.AddReminder.values = {_op: _op
-                                    ,init: init
-                                    ,view: view
-                                    ,update: update
-                                    ,Model: Model
-                                    ,ChangeBody: ChangeBody
-                                    ,ChangeCreated: ChangeCreated
-                                    ,ChangeDeadline: ChangeDeadline
-                                    ,AddReminder: AddReminder
-                                    ,ToggleHide: ToggleHide
-                                    ,NoOp: NoOp};
-};Elm.Native.Date = {};
-Elm.Native.Date.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Date = localRuntime.Native.Date || {};
-	if (localRuntime.Native.Date.values)
-	{
-		return localRuntime.Native.Date.values;
-	}
-
-	var Result = Elm.Result.make(localRuntime);
-
-	function readDate(str)
-	{
-		var date = new Date(str);
-		return isNaN(date.getTime())
-			? Result.Err('unable to parse \'' + str + '\' as a date')
-			: Result.Ok(date);
-	}
-
-	var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-	var monthTable =
-		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-
-	return localRuntime.Native.Date.values = {
-		read: readDate,
-		year: function(d) { return d.getFullYear(); },
-		month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
-		day: function(d) { return d.getDate(); },
-		hour: function(d) { return d.getHours(); },
-		minute: function(d) { return d.getMinutes(); },
-		second: function(d) { return d.getSeconds(); },
-		millisecond: function(d) { return d.getMilliseconds(); },
-		toTime: function(d) { return d.getTime(); },
-		fromTime: function(t) { return new Date(t); },
-		dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
-	};
-};
-Elm.Native.Time = {};
+};Elm.Native.Time = {};
 
 Elm.Native.Time.make = function(localRuntime)
 {
@@ -11649,7 +11484,46 @@ Elm.Time.make = function (_elm) {
                              ,timestamp: timestamp
                              ,delay: delay
                              ,since: since};
-};Elm.Date = Elm.Date || {};
+};Elm.Native.Date = {};
+Elm.Native.Date.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Date = localRuntime.Native.Date || {};
+	if (localRuntime.Native.Date.values)
+	{
+		return localRuntime.Native.Date.values;
+	}
+
+	var Result = Elm.Result.make(localRuntime);
+
+	function readDate(str)
+	{
+		var date = new Date(str);
+		return isNaN(date.getTime())
+			? Result.Err('unable to parse \'' + str + '\' as a date')
+			: Result.Ok(date);
+	}
+
+	var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	var monthTable =
+		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+	return localRuntime.Native.Date.values = {
+		read: readDate,
+		year: function(d) { return d.getFullYear(); },
+		month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
+		day: function(d) { return d.getDate(); },
+		hour: function(d) { return d.getHours(); },
+		minute: function(d) { return d.getMinutes(); },
+		second: function(d) { return d.getSeconds(); },
+		millisecond: function(d) { return d.getMilliseconds(); },
+		toTime: function(d) { return d.getTime(); },
+		fromTime: function(t) { return new Date(t); },
+		dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
+	};
+};
+Elm.Date = Elm.Date || {};
 Elm.Date.make = function (_elm) {
    "use strict";
    _elm.Date = _elm.Date || {};
@@ -11721,52 +11595,6 @@ Elm.Date.make = function (_elm) {
                              ,Fri: Fri
                              ,Sat: Sat
                              ,Sun: Sun};
-};Elm.Static = Elm.Static || {};
-Elm.Static.make = function (_elm) {
-   "use strict";
-   _elm.Static = _elm.Static || {};
-   if (_elm.Static.values) return _elm.Static.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var emails = _U.list([{from: "bossman@corporate.me"
-                         ,to: "manager@corporate.me"
-                         ,title: "Corporate Ipsum"
-                         ,body: "Collaboratively administrate empowered markets via plug-and-play\n                networks. Dynamically procrastinate B2C users after installed base\n                benefits. Dramatically visualize customer directed convergence without\n                revolutionary ROI.\n\n                Efficiently unleash cross-media information without cross-media\n                value. Quickly maximize timely deliverables for real-time\n                schemas. Dramatically maintain clicks-and-mortar solutions\n                without functional solutions.\n\n                Completely synergize resource taxing relationships via premier\n                niche markets. Professionally cultivate one-to-one customer\n                service with robust ideas. Dynamically innovate\n                resource-leveling customer service for state of the art customer\n                service."
-                         ,date: "2015-01-30"}
-                        ,{from: "hello@test.me"
-                         ,to: "goodbye@test.me"
-                         ,title: "Shorter than 200"
-                         ,body: "This is the body of an email with less than 200 characters."
-                         ,date: "2015-09-30"}]);
-   var email = {from: "hello@test.me"
-               ,to: "goodbye@test.me"
-               ,title: "Shorter than 200"
-               ,body: "This is the body of an email with less than 200 characters."
-               ,date: "2015-09-30"};
-   var reminders = _U.list([{body: "Take out the trash"
-                            ,created: "2016-09-30"
-                            ,deadline: "2016-09-30"}
-                           ,{body: "Groceries"
-                            ,created: "2015-09-25"
-                            ,deadline: "2015-09-25"}]);
-   var Reminder = F3(function (a,b,c) {
-      return {body: a,created: b,deadline: c};
-   });
-   var Email = F5(function (a,b,c,d,e) {
-      return {from: a,to: b,title: c,body: d,date: e};
-   });
-   return _elm.Static.values = {_op: _op
-                               ,Email: Email
-                               ,Reminder: Reminder
-                               ,reminders: reminders
-                               ,email: email
-                               ,emails: emails};
 };Elm.Native.Regex = {};
 Elm.Native.Regex.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -12105,6 +11933,11 @@ Elm.Utils.make = function (_elm) {
             return -1;
          }
    };
+   var timeToDateStringReverse = function (time) {
+      return $Basics.toString(A2($Date$Format.format,
+      "%d-%m-%Y",
+      $Date.fromTime(time)));
+   };
    var timeToDateString = function (time) {
       return $Basics.toString(A2($Date$Format.format,
       "%Y-%m-%d",
@@ -12112,10 +11945,197 @@ Elm.Utils.make = function (_elm) {
    };
    return _elm.Utils.values = {_op: _op
                               ,timeToDateString: timeToDateString
+                              ,timeToDateStringReverse: timeToDateStringReverse
                               ,dateStringToTime: dateStringToTime
                               ,monthToInt: monthToInt
                               ,compareDates: compareDates
                               ,reverseComparison: reverseComparison};
+};Elm.AddReminder = Elm.AddReminder || {};
+Elm.AddReminder.make = function (_elm) {
+   "use strict";
+   _elm.AddReminder = _elm.AddReminder || {};
+   if (_elm.AddReminder.values) return _elm.AddReminder.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Utils = Elm.Utils.make(_elm);
+   var _op = {};
+   var fieldInput = F4(function (fieldType,
+   address,
+   toAction,
+   content) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,_U.list([]),_U.list([]))
+              ,A2($Html.input,
+              _U.list([$Html$Attributes.type$(fieldType)
+                      ,$Html$Attributes.value(content)
+                      ,A3($Html$Events.on,
+                      "input",
+                      $Html$Events.targetValue,
+                      function (string) {
+                         return A2($Signal.message,address,toAction(string));
+                      })]),
+              _U.list([]))]));
+   });
+   var takeOutput = function (model) {
+      return {body: model.body
+             ,created: model.created
+             ,deadline: model.deadline};
+   };
+   var NoOp = {ctor: "NoOp"};
+   var TimeUpdate = function (a) {
+      return {ctor: "TimeUpdate",_0: a};
+   };
+   var ToggleHide = {ctor: "ToggleHide"};
+   var hideButton = F2(function (address,model) {
+      return model.hide ? A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
+      _U.list([$Html.text("Unhide Add Reminder")])) : A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
+      _U.list([$Html.text("Hide")]));
+   });
+   var AddReminder = F2(function (a,b) {
+      return {ctor: "AddReminder",_0: a,_1: b};
+   });
+   var submitButton = F2(function (address,model) {
+      return A2($Html.button,
+      _U.list([A2($Html$Events.onClick,
+      address,
+      A2(AddReminder,takeOutput(model),model.hide))]),
+      _U.list([$Html.text("Add")]));
+   });
+   var ChangeDeadline = function (a) {
+      return {ctor: "ChangeDeadline",_0: a};
+   };
+   var ChangeCreated = function (a) {
+      return {ctor: "ChangeCreated",_0: a};
+   };
+   var ChangeBody = function (a) {
+      return {ctor: "ChangeBody",_0: a};
+   };
+   var view = F2(function (address,model) {
+      return model.hide ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A2(hideButton,address,model)]))])) : A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Reminder: ")
+                      ,A4(fieldInput,"text",address,ChangeBody,model.body)]))
+              ,A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Created: ")
+                      ,A4(fieldInput,"date",address,ChangeCreated,model.created)]))
+              ,A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Deadline: ")
+                      ,A4(fieldInput,"date",address,ChangeDeadline,model.deadline)]))
+              ,A2(submitButton,address,model)
+              ,A2(hideButton,address,model)]))]));
+   });
+   var init = function (hideIt) {
+      return {body: ""
+             ,created: "2015-01-01"
+             ,deadline: "2015-01-02"
+             ,hide: hideIt
+             ,defaultDate: true};
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "ChangeBody": return _U.update(model,{body: _p0._0});
+         case "ChangeCreated": return _U.update(model,
+           {created: _p0._0,defaultDate: false});
+         case "ChangeDeadline": return _U.update(model,
+           {deadline: _p0._0});
+         case "AddReminder": return init(_p0._1);
+         case "ToggleHide": var notHide = $Basics.not(model.hide);
+           return _U.update(model,{hide: notHide});
+         case "TimeUpdate": return model.defaultDate ? _U.update(model,
+           {created: $Utils.timeToDateStringReverse(_p0._0)}) : model;
+         default: return model;}
+   });
+   var Output = F3(function (a,b,c) {
+      return {body: a,created: b,deadline: c};
+   });
+   var Model = F5(function (a,b,c,d,e) {
+      return {body: a
+             ,created: b
+             ,deadline: c
+             ,hide: d
+             ,defaultDate: e};
+   });
+   return _elm.AddReminder.values = {_op: _op
+                                    ,init: init
+                                    ,view: view
+                                    ,update: update
+                                    ,Model: Model
+                                    ,ChangeBody: ChangeBody
+                                    ,ChangeCreated: ChangeCreated
+                                    ,ChangeDeadline: ChangeDeadline
+                                    ,AddReminder: AddReminder
+                                    ,ToggleHide: ToggleHide
+                                    ,TimeUpdate: TimeUpdate
+                                    ,NoOp: NoOp};
+};Elm.Static = Elm.Static || {};
+Elm.Static.make = function (_elm) {
+   "use strict";
+   _elm.Static = _elm.Static || {};
+   if (_elm.Static.values) return _elm.Static.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var emails = _U.list([{from: "bossman@corporate.me"
+                         ,to: "manager@corporate.me"
+                         ,title: "Corporate Ipsum"
+                         ,body: "Collaboratively administrate empowered markets via plug-and-play\n                networks. Dynamically procrastinate B2C users after installed base\n                benefits. Dramatically visualize customer directed convergence without\n                revolutionary ROI.\n\n                Efficiently unleash cross-media information without cross-media\n                value. Quickly maximize timely deliverables for real-time\n                schemas. Dramatically maintain clicks-and-mortar solutions\n                without functional solutions.\n\n                Completely synergize resource taxing relationships via premier\n                niche markets. Professionally cultivate one-to-one customer\n                service with robust ideas. Dynamically innovate\n                resource-leveling customer service for state of the art customer\n                service."
+                         ,date: "2015-01-30"}
+                        ,{from: "hello@test.me"
+                         ,to: "goodbye@test.me"
+                         ,title: "Shorter than 200"
+                         ,body: "This is the body of an email with less than 200 characters."
+                         ,date: "2015-09-30"}]);
+   var email = {from: "hello@test.me"
+               ,to: "goodbye@test.me"
+               ,title: "Shorter than 200"
+               ,body: "This is the body of an email with less than 200 characters."
+               ,date: "2015-09-30"};
+   var reminders = _U.list([{body: "Take out the trash"
+                            ,created: "2016-09-30"
+                            ,deadline: "2016-09-30"}
+                           ,{body: "Groceries"
+                            ,created: "2015-09-25"
+                            ,deadline: "2015-09-25"}]);
+   var Reminder = F3(function (a,b,c) {
+      return {body: a,created: b,deadline: c};
+   });
+   var Email = F5(function (a,b,c,d,e) {
+      return {from: a,to: b,title: c,body: d,date: e};
+   });
+   return _elm.Static.values = {_op: _op
+                               ,Email: Email
+                               ,Reminder: Reminder
+                               ,reminders: reminders
+                               ,email: email
+                               ,emails: emails};
 };Elm.Item = Elm.Item || {};
 Elm.Item.make = function (_elm) {
    "use strict";
@@ -12804,16 +12824,21 @@ Elm.ItemList.make = function (_elm) {
          var notHideDone = $Basics.not(model.hideDone);
            var newModel = _U.update(model,{hideDone: notHideDone});
            return fixFocus(newModel);
-         case "TimeUpdate": var theItems = A2($List.map,
+         case "TimeUpdate": var _p49 = _p39._0;
+           var theItems = A2($List.map,
            function (_p47) {
               var _p48 = _p47;
               return {ctor: "_Tuple3"
                      ,_0: _p48._0
                      ,_1: _p48._1
-                     ,_2: A2($Item.update,$Item.TimeUpdate(_p39._0),_p48._2)};
+                     ,_2: A2($Item.update,$Item.TimeUpdate(_p49),_p48._2)};
            },
            model.items);
-           var newModel = _U.update(model,{items: theItems});
+           var newModel = _U.update(model,
+           {items: theItems
+           ,addReminder: A2($AddReminder.update,
+           $AddReminder.TimeUpdate(_p49),
+           model.addReminder)});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
          default: return model;}
    });

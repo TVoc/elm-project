@@ -11360,133 +11360,6 @@ Elm.Html.Events.make = function (_elm) {
                                     ,keyCode: keyCode
                                     ,Options: Options};
 };
-Elm.AddReminder = Elm.AddReminder || {};
-Elm.AddReminder.make = function (_elm) {
-   "use strict";
-   _elm.AddReminder = _elm.AddReminder || {};
-   if (_elm.AddReminder.values) return _elm.AddReminder.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var fieldInput = F4(function (fieldType,
-   address,
-   toAction,
-   content) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,_U.list([]),_U.list([]))
-              ,A2($Html.input,
-              _U.list([$Html$Attributes.type$(fieldType)
-                      ,$Html$Attributes.value(content)
-                      ,A3($Html$Events.on,
-                      "input",
-                      $Html$Events.targetValue,
-                      function (string) {
-                         return A2($Signal.message,address,toAction(string));
-                      })]),
-              _U.list([]))]));
-   });
-   var NoOp = {ctor: "NoOp"};
-   var AddReminder = function (a) {
-      return {ctor: "AddReminder",_0: a};
-   };
-   var submitButton = F2(function (address,model) {
-      return A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,AddReminder(model))]),
-      _U.list([$Html.text("Add")]));
-   });
-   var ChangeCreated = function (a) {
-      return {ctor: "ChangeCreated",_0: a};
-   };
-   var ChangeBody = function (a) {
-      return {ctor: "ChangeBody",_0: a};
-   };
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,
-      _U.list([]),
-      _U.list([A4(fieldInput,"text",address,ChangeBody,model.body)
-              ,A4(fieldInput,"date",address,ChangeCreated,model.created)
-              ,A2(submitButton,address,model)]))]));
-   });
-   var reminderMailBox = $Signal.mailbox(NoOp);
-   var reminderAddress = reminderMailBox.address;
-   var reminderActions = reminderMailBox.signal;
-   var init = {body: "",created: "2015-01-01"};
-   var update = F2(function (action,model) {
-      var _p0 = action;
-      switch (_p0.ctor)
-      {case "ChangeBody": return _U.update(model,{body: _p0._0});
-         case "ChangeCreated": return _U.update(model,{created: _p0._0});
-         case "AddReminder": return init;
-         default: return model;}
-   });
-   var state = A3($Signal.foldp,update,init,reminderActions);
-   var Model = F2(function (a,b) {
-      return {body: a,created: b};
-   });
-   return _elm.AddReminder.values = {_op: _op
-                                    ,init: init
-                                    ,view: view
-                                    ,reminderActions: reminderActions
-                                    ,reminderAddress: reminderAddress
-                                    ,state: state
-                                    ,update: update
-                                    ,Model: Model
-                                    ,ChangeBody: ChangeBody
-                                    ,ChangeCreated: ChangeCreated
-                                    ,AddReminder: AddReminder
-                                    ,NoOp: NoOp};
-};
-Elm.Native.Date = {};
-Elm.Native.Date.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Date = localRuntime.Native.Date || {};
-	if (localRuntime.Native.Date.values)
-	{
-		return localRuntime.Native.Date.values;
-	}
-
-	var Result = Elm.Result.make(localRuntime);
-
-	function readDate(str)
-	{
-		var date = new Date(str);
-		return isNaN(date.getTime())
-			? Result.Err('unable to parse \'' + str + '\' as a date')
-			: Result.Ok(date);
-	}
-
-	var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-	var monthTable =
-		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-
-	return localRuntime.Native.Date.values = {
-		read: readDate,
-		year: function(d) { return d.getFullYear(); },
-		month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
-		day: function(d) { return d.getDate(); },
-		hour: function(d) { return d.getHours(); },
-		minute: function(d) { return d.getMinutes(); },
-		second: function(d) { return d.getSeconds(); },
-		millisecond: function(d) { return d.getMilliseconds(); },
-		toTime: function(d) { return d.getTime(); },
-		fromTime: function(t) { return new Date(t); },
-		dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
-	};
-};
-
 Elm.Native.Time = {};
 
 Elm.Native.Time.make = function(localRuntime)
@@ -11652,6 +11525,46 @@ Elm.Time.make = function (_elm) {
                              ,delay: delay
                              ,since: since};
 };
+Elm.Native.Date = {};
+Elm.Native.Date.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Date = localRuntime.Native.Date || {};
+	if (localRuntime.Native.Date.values)
+	{
+		return localRuntime.Native.Date.values;
+	}
+
+	var Result = Elm.Result.make(localRuntime);
+
+	function readDate(str)
+	{
+		var date = new Date(str);
+		return isNaN(date.getTime())
+			? Result.Err('unable to parse \'' + str + '\' as a date')
+			: Result.Ok(date);
+	}
+
+	var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	var monthTable =
+		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+	return localRuntime.Native.Date.values = {
+		read: readDate,
+		year: function(d) { return d.getFullYear(); },
+		month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
+		day: function(d) { return d.getDate(); },
+		hour: function(d) { return d.getHours(); },
+		minute: function(d) { return d.getMinutes(); },
+		second: function(d) { return d.getSeconds(); },
+		millisecond: function(d) { return d.getMilliseconds(); },
+		toTime: function(d) { return d.getTime(); },
+		fromTime: function(t) { return new Date(t); },
+		dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
+	};
+};
+
 Elm.Date = Elm.Date || {};
 Elm.Date.make = function (_elm) {
    "use strict";
@@ -11725,6 +11638,514 @@ Elm.Date.make = function (_elm) {
                              ,Sat: Sat
                              ,Sun: Sun};
 };
+Elm.Native.Regex = {};
+Elm.Native.Regex.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Regex = localRuntime.Native.Regex || {};
+	if (localRuntime.Native.Regex.values)
+	{
+		return localRuntime.Native.Regex.values;
+	}
+	if ('values' in Elm.Native.Regex)
+	{
+		return localRuntime.Native.Regex.values = Elm.Native.Regex.values;
+	}
+
+	var List = Elm.Native.List.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+
+	function escape(str)
+	{
+		return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+	}
+	function caseInsensitive(re)
+	{
+		return new RegExp(re.source, 'gi');
+	}
+	function regex(raw)
+	{
+		return new RegExp(raw, 'g');
+	}
+
+	function contains(re, string)
+	{
+		return string.match(re) !== null;
+	}
+
+	function find(n, re, str)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		var out = [];
+		var number = 0;
+		var string = str;
+		var lastIndex = re.lastIndex;
+		var prevLastIndex = -1;
+		var result;
+		while (number++ < n && (result = re.exec(string)))
+		{
+			if (prevLastIndex === re.lastIndex) break;
+			var i = result.length - 1;
+			var subs = new Array(i);
+			while (i > 0)
+			{
+				var submatch = result[i];
+				subs[--i] = submatch === undefined
+					? Maybe.Nothing
+					: Maybe.Just(submatch);
+			}
+			out.push({
+				match: result[0],
+				submatches: List.fromArray(subs),
+				index: result.index,
+				number: number
+			});
+			prevLastIndex = re.lastIndex;
+		}
+		re.lastIndex = lastIndex;
+		return List.fromArray(out);
+	}
+
+	function replace(n, re, replacer, string)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		var count = 0;
+		function jsReplacer(match)
+		{
+			if (count++ >= n)
+			{
+				return match;
+			}
+			var i = arguments.length - 3;
+			var submatches = new Array(i);
+			while (i > 0)
+			{
+				var submatch = arguments[i];
+				submatches[--i] = submatch === undefined
+					? Maybe.Nothing
+					: Maybe.Just(submatch);
+			}
+			return replacer({
+				match: match,
+				submatches: List.fromArray(submatches),
+				index: arguments[i - 1],
+				number: count
+			});
+		}
+		return string.replace(re, jsReplacer);
+	}
+
+	function split(n, re, str)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		if (n === Infinity)
+		{
+			return List.fromArray(str.split(re));
+		}
+		var string = str;
+		var result;
+		var out = [];
+		var start = re.lastIndex;
+		while (n--)
+		{
+			if (!(result = re.exec(string))) break;
+			out.push(string.slice(start, result.index));
+			start = re.lastIndex;
+		}
+		out.push(string.slice(start));
+		return List.fromArray(out);
+	}
+
+	return Elm.Native.Regex.values = {
+		regex: regex,
+		caseInsensitive: caseInsensitive,
+		escape: escape,
+
+		contains: F2(contains),
+		find: F3(find),
+		replace: F4(replace),
+		split: F3(split)
+	};
+};
+
+Elm.Regex = Elm.Regex || {};
+Elm.Regex.make = function (_elm) {
+   "use strict";
+   _elm.Regex = _elm.Regex || {};
+   if (_elm.Regex.values) return _elm.Regex.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Regex = Elm.Native.Regex.make(_elm);
+   var _op = {};
+   var split = $Native$Regex.split;
+   var replace = $Native$Regex.replace;
+   var find = $Native$Regex.find;
+   var AtMost = function (a) {    return {ctor: "AtMost",_0: a};};
+   var All = {ctor: "All"};
+   var Match = F4(function (a,b,c,d) {
+      return {match: a,submatches: b,index: c,number: d};
+   });
+   var contains = $Native$Regex.contains;
+   var caseInsensitive = $Native$Regex.caseInsensitive;
+   var regex = $Native$Regex.regex;
+   var escape = $Native$Regex.escape;
+   var Regex = {ctor: "Regex"};
+   return _elm.Regex.values = {_op: _op
+                              ,regex: regex
+                              ,escape: escape
+                              ,caseInsensitive: caseInsensitive
+                              ,contains: contains
+                              ,find: find
+                              ,replace: replace
+                              ,split: split
+                              ,Match: Match
+                              ,All: All
+                              ,AtMost: AtMost};
+};
+Elm.Date = Elm.Date || {};
+Elm.Date.Format = Elm.Date.Format || {};
+Elm.Date.Format.make = function (_elm) {
+   "use strict";
+   _elm.Date = _elm.Date || {};
+   _elm.Date.Format = _elm.Date.Format || {};
+   if (_elm.Date.Format.values) return _elm.Date.Format.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Regex = Elm.Regex.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
+   var _op = {};
+   var padWith = function (c) {
+      return function (_p0) {
+         return A3($String.padLeft,2,c,$Basics.toString(_p0));
+      };
+   };
+   var mod12 = function (h) {
+      return A2($Basics._op["%"],h,12);
+   };
+   var fullDayOfWeek = function (dow) {
+      var _p1 = dow;
+      switch (_p1.ctor)
+      {case "Mon": return "Monday";
+         case "Tue": return "Tuesday";
+         case "Wed": return "Wednesday";
+         case "Thu": return "Thursday";
+         case "Fri": return "Friday";
+         case "Sat": return "Saturday";
+         default: return "Sunday";}
+   };
+   var monthToFullName = function (m) {
+      var _p2 = m;
+      switch (_p2.ctor)
+      {case "Jan": return "January";
+         case "Feb": return "February";
+         case "Mar": return "March";
+         case "Apr": return "April";
+         case "May": return "May";
+         case "Jun": return "June";
+         case "Jul": return "July";
+         case "Aug": return "August";
+         case "Sep": return "September";
+         case "Oct": return "October";
+         case "Nov": return "November";
+         default: return "December";}
+   };
+   var monthToInt = function (m) {
+      var _p3 = m;
+      switch (_p3.ctor)
+      {case "Jan": return 1;
+         case "Feb": return 2;
+         case "Mar": return 3;
+         case "Apr": return 4;
+         case "May": return 5;
+         case "Jun": return 6;
+         case "Jul": return 7;
+         case "Aug": return 8;
+         case "Sep": return 9;
+         case "Oct": return 10;
+         case "Nov": return 11;
+         default: return 12;}
+   };
+   var collapse = function (m) {
+      return A2($Maybe.andThen,m,$Basics.identity);
+   };
+   var formatToken = F2(function (d,m) {
+      var symbol = A2($Maybe.withDefault,
+      " ",
+      collapse(A2($Maybe.andThen,
+      $List.tail(m.submatches),
+      $List.head)));
+      var prefix = A2($Maybe.withDefault,
+      " ",
+      collapse($List.head(m.submatches)));
+      return A2($Basics._op["++"],
+      prefix,
+      function () {
+         var _p4 = symbol;
+         switch (_p4)
+         {case "Y": return $Basics.toString($Date.year(d));
+            case "m": return A3($String.padLeft,
+              2,
+              _U.chr("0"),
+              $Basics.toString(monthToInt($Date.month(d))));
+            case "B": return monthToFullName($Date.month(d));
+            case "b": return $Basics.toString($Date.month(d));
+            case "d": return A2(padWith,_U.chr("0"),$Date.day(d));
+            case "e": return A2(padWith,_U.chr(" "),$Date.day(d));
+            case "a": return $Basics.toString($Date.dayOfWeek(d));
+            case "A": return fullDayOfWeek($Date.dayOfWeek(d));
+            case "H": return A2(padWith,_U.chr("0"),$Date.hour(d));
+            case "k": return A2(padWith,_U.chr(" "),$Date.hour(d));
+            case "I": return A2(padWith,_U.chr("0"),mod12($Date.hour(d)));
+            case "l": return A2(padWith,_U.chr(" "),mod12($Date.hour(d)));
+            case "p": return _U.cmp($Date.hour(d),13) < 0 ? "AM" : "PM";
+            case "P": return _U.cmp($Date.hour(d),13) < 0 ? "am" : "pm";
+            case "M": return A2(padWith,_U.chr("0"),$Date.minute(d));
+            case "S": return A2(padWith,_U.chr("0"),$Date.second(d));
+            default: return "";}
+      }());
+   });
+   var re = $Regex.regex("(^|[^%])%(Y|m|B|b|d|e|a|A|H|k|I|l|p|P|M|S)");
+   var format = F2(function (s,d) {
+      return A4($Regex.replace,$Regex.All,re,formatToken(d),s);
+   });
+   return _elm.Date.Format.values = {_op: _op,format: format};
+};
+Elm.Utils = Elm.Utils || {};
+Elm.Utils.make = function (_elm) {
+   "use strict";
+   _elm.Utils = _elm.Utils || {};
+   if (_elm.Utils.values) return _elm.Utils.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Date$Format = Elm.Date.Format.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var reverseComparison = function (comp) {
+      var _p0 = comp;
+      switch (_p0.ctor)
+      {case "LT": return $Basics.GT;
+         case "GT": return $Basics.LT;
+         default: return $Basics.EQ;}
+   };
+   var compareDates = F2(function (_p2,_p1) {
+      var _p3 = _p2;
+      var _p10 = _p3._0;
+      var _p9 = _p3._1;
+      var _p8 = _p3._2;
+      var _p4 = _p1;
+      var _p7 = _p4._0;
+      var _p6 = _p4._1;
+      var _p5 = _p4._2;
+      return _U.cmp(_p10,_p7) < 0 ? $Basics.LT : _U.cmp(_p10,
+      _p7) > 0 ? $Basics.GT : _U.cmp(_p9,
+      _p6) < 0 ? $Basics.LT : _U.cmp(_p9,
+      _p6) > 0 ? $Basics.GT : _U.cmp(_p8,
+      _p5) < 0 ? $Basics.LT : _U.cmp(_p8,
+      _p5) > 0 ? $Basics.GT : $Basics.EQ;
+   });
+   var monthToInt = function (month) {
+      var _p11 = month;
+      switch (_p11.ctor)
+      {case "Jan": return 0;
+         case "Feb": return 1;
+         case "Mar": return 2;
+         case "Apr": return 3;
+         case "May": return 4;
+         case "Jun": return 5;
+         case "Jul": return 6;
+         case "Aug": return 7;
+         case "Sep": return 8;
+         case "Oct": return 9;
+         case "Nov": return 10;
+         default: return 11;}
+   };
+   var dateStringToTime = function (dateString) {
+      var converted = $Date.fromString(dateString);
+      var _p12 = converted;
+      if (_p12.ctor === "Ok") {
+            return $Date.toTime(_p12._0);
+         } else {
+            return -1;
+         }
+   };
+   var timeToDateStringReverse = function (time) {
+      return $Basics.toString(A2($Date$Format.format,
+      "%d-%m-%Y",
+      $Date.fromTime(time)));
+   };
+   var timeToDateString = function (time) {
+      var baseString = $Basics.toString(A2($Date$Format.format,
+      "%Y-%m-%d",
+      $Date.fromTime(time)));
+      var fromRight = A2($String.right,
+      $String.length(baseString) - 1,
+      baseString);
+      var fromLeft = A2($String.left,
+      $String.length(fromRight) - 1,
+      fromRight);
+      return fromLeft;
+   };
+   return _elm.Utils.values = {_op: _op
+                              ,timeToDateString: timeToDateString
+                              ,timeToDateStringReverse: timeToDateStringReverse
+                              ,dateStringToTime: dateStringToTime
+                              ,monthToInt: monthToInt
+                              ,compareDates: compareDates
+                              ,reverseComparison: reverseComparison};
+};
+Elm.AddReminder = Elm.AddReminder || {};
+Elm.AddReminder.make = function (_elm) {
+   "use strict";
+   _elm.AddReminder = _elm.AddReminder || {};
+   if (_elm.AddReminder.values) return _elm.AddReminder.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Utils = Elm.Utils.make(_elm);
+   var _op = {};
+   var fieldInput = F4(function (fieldType,
+   address,
+   toAction,
+   content) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,_U.list([]),_U.list([]))
+              ,A2($Html.input,
+              _U.list([$Html$Attributes.type$(fieldType)
+                      ,$Html$Attributes.value(content)
+                      ,A3($Html$Events.on,
+                      "input",
+                      $Html$Events.targetValue,
+                      function (string) {
+                         return A2($Signal.message,address,toAction(string));
+                      })]),
+              _U.list([]))]));
+   });
+   var takeOutput = function (model) {
+      return {body: model.body
+             ,created: model.created
+             ,deadline: model.deadline};
+   };
+   var NoOp = {ctor: "NoOp"};
+   var TimeUpdate = function (a) {
+      return {ctor: "TimeUpdate",_0: a};
+   };
+   var ToggleHide = {ctor: "ToggleHide"};
+   var hideButton = F2(function (address,model) {
+      return model.hide ? A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
+      _U.list([$Html.text("Unhide Add Reminder")])) : A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
+      _U.list([$Html.text("Hide")]));
+   });
+   var AddReminder = F2(function (a,b) {
+      return {ctor: "AddReminder",_0: a,_1: b};
+   });
+   var submitButton = F2(function (address,model) {
+      return A2($Html.button,
+      _U.list([A2($Html$Events.onClick,
+      address,
+      A2(AddReminder,takeOutput(model),model.hide))]),
+      _U.list([$Html.text("Add")]));
+   });
+   var ChangeDeadline = function (a) {
+      return {ctor: "ChangeDeadline",_0: a};
+   };
+   var ChangeCreated = function (a) {
+      return {ctor: "ChangeCreated",_0: a};
+   };
+   var ChangeBody = function (a) {
+      return {ctor: "ChangeBody",_0: a};
+   };
+   var view = F2(function (address,model) {
+      return model.hide ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A2(hideButton,address,model)]))])) : A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Reminder: ")
+                      ,A4(fieldInput,"text",address,ChangeBody,model.body)]))
+              ,A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Created: ")
+                      ,A4(fieldInput,"date",address,ChangeCreated,model.created)]))
+              ,A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Deadline: ")
+                      ,A4(fieldInput,"date",address,ChangeDeadline,model.deadline)]))
+              ,A2(submitButton,address,model)
+              ,A2(hideButton,address,model)]))]));
+   });
+   var init = function (hideIt) {
+      return {body: ""
+             ,created: "2015-01-01"
+             ,deadline: "2015-01-02"
+             ,hide: hideIt
+             ,defaultDate: true};
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "ChangeBody": return _U.update(model,{body: _p0._0});
+         case "ChangeCreated": return _U.update(model,
+           {created: _p0._0,defaultDate: false});
+         case "ChangeDeadline": return _U.update(model,
+           {deadline: _p0._0});
+         case "AddReminder": return init(_p0._1);
+         case "ToggleHide": var notHide = $Basics.not(model.hide);
+           return _U.update(model,{hide: notHide});
+         case "TimeUpdate": return model.defaultDate ? _U.update(model,
+           {created: $Utils.timeToDateString(_p0._0)}) : model;
+         default: return model;}
+   });
+   var Output = F3(function (a,b,c) {
+      return {body: a,created: b,deadline: c};
+   });
+   var Model = F5(function (a,b,c,d,e) {
+      return {body: a
+             ,created: b
+             ,deadline: c
+             ,hide: d
+             ,defaultDate: e};
+   });
+   return _elm.AddReminder.values = {_op: _op
+                                    ,init: init
+                                    ,view: view
+                                    ,update: update
+                                    ,Model: Model
+                                    ,ChangeBody: ChangeBody
+                                    ,ChangeCreated: ChangeCreated
+                                    ,ChangeDeadline: ChangeDeadline
+                                    ,AddReminder: AddReminder
+                                    ,ToggleHide: ToggleHide
+                                    ,TimeUpdate: TimeUpdate
+                                    ,NoOp: NoOp};
+};
 Elm.Static = Elm.Static || {};
 Elm.Static.make = function (_elm) {
    "use strict";
@@ -11754,10 +12175,13 @@ Elm.Static.make = function (_elm) {
                ,body: "This is the body of an email with less than 200 characters."
                ,date: "2015-09-30"};
    var reminders = _U.list([{body: "Take out the trash"
-                            ,created: "2016-09-30"}
-                           ,{body: "Groceries",created: "2015-09-25"}]);
-   var Reminder = F2(function (a,b) {
-      return {body: a,created: b};
+                            ,created: "2016-09-30"
+                            ,deadline: "2016-09-30"}
+                           ,{body: "Groceries"
+                            ,created: "2015-09-25"
+                            ,deadline: "2015-09-25"}]);
+   var Reminder = F3(function (a,b,c) {
+      return {body: a,created: b,deadline: c};
    });
    var Email = F5(function (a,b,c,d,e) {
       return {from: a,to: b,title: c,body: d,date: e};
@@ -11786,29 +12210,38 @@ Elm.Item.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Static = Elm.Static.make(_elm),
-   $String = Elm.String.make(_elm);
+   $String = Elm.String.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Utils = Elm.Utils.make(_elm);
    var _op = {};
    var truncate = function (text) {
       return A2($String.append,A3($String.slice,0,200,text),"...");
    };
+   var styleExpiredFocus = $Html$Attributes.style(_U.list([{ctor: "_Tuple2"
+                                                           ,_0: "border-left"
+                                                           ,_1: "thick double rgb(201, 31, 31)"}
+                                                          ,{ctor: "_Tuple2"
+                                                           ,_0: "background-color"
+                                                           ,_1: "rgba(201, 31, 31, 0.5)"}]));
+   var styleExpired = $Html$Attributes.style(_U.list([{ctor: "_Tuple2"
+                                                      ,_0: "background-color"
+                                                      ,_1: "rgba(201, 31, 31, 0.2)"}]));
    var borderStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2"
                                                      ,_0: "border-left"
                                                      ,_1: "thick double rgb(201, 31, 31)"}]));
+   var genStyleFocusExpired = function (model) {
+      return model.deadlineExpired && model.focus ? _U.list([styleExpiredFocus]) : _U.list([]);
+   };
+   var genStyleExpired = function (model) {
+      return model.deadlineExpired ? _U.list([styleExpired]) : _U.list([]);
+   };
    var genBorderStyle = function (model) {
       return model.focus ? _U.list([borderStyle]) : _U.list([]);
    };
-   var update = F2(function (action,model) {
-      var _p0 = action;
-      switch (_p0.ctor)
-      {case "ToggleDo": return model.done ? _U.update(model,
-           {done: false}) : _U.update(model,{done: true});
-         case "TogglePin": return model.pinned ? _U.update(model,
-           {pinned: false}) : _U.update(model,{pinned: true});
-         case "ToggleTruncate": return model.truncated ? _U.update(model,
-           {truncated: false}) : _U.update(model,{truncated: true});
-         default: return model;}
-   });
    var NoOp = {ctor: "NoOp"};
+   var TimeUpdate = function (a) {
+      return {ctor: "TimeUpdate",_0: a};
+   };
    var ToggleTruncate = {ctor: "ToggleTruncate"};
    var moreLessButton = F2(function (address,model) {
       return model.truncated ? A2($Html.button,
@@ -11833,22 +12266,6 @@ Elm.Item.make = function (_elm) {
       _U.list([A2($Html$Events.onClick,address,ToggleDo)]),
       _U.list([$Html.text("Do")]));
    });
-   var monthToInt = function (month) {
-      var _p1 = month;
-      switch (_p1.ctor)
-      {case "Jan": return 0;
-         case "Feb": return 1;
-         case "Mar": return 2;
-         case "Apr": return 3;
-         case "May": return 4;
-         case "Jun": return 5;
-         case "Jul": return 6;
-         case "Aug": return 7;
-         case "Sep": return 8;
-         case "Oct": return 9;
-         case "Nov": return 10;
-         default: return 11;}
-   };
    var extractTitleEmail = function (email) {
       return email.title;
    };
@@ -11857,41 +12274,41 @@ Elm.Item.make = function (_elm) {
    };
    var extractDateEmail = function (email) {
       var dateRes = $Date.fromString(email.date);
-      var _p2 = dateRes;
-      if (_p2.ctor === "Ok") {
-            var _p3 = _p2._0;
+      var _p0 = dateRes;
+      if (_p0.ctor === "Ok") {
+            var _p1 = _p0._0;
             return {ctor: "_Tuple3"
-                   ,_0: $Date.year(_p3)
-                   ,_1: monthToInt($Date.month(_p3))
-                   ,_2: $Date.day(_p3)};
+                   ,_0: $Date.year(_p1)
+                   ,_1: $Utils.monthToInt($Date.month(_p1))
+                   ,_2: $Date.day(_p1)};
          } else {
             return {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0};
          }
    };
    var extractDateReminder = function (reminder) {
       var dateRes = $Date.fromString(reminder.created);
-      var _p4 = dateRes;
-      if (_p4.ctor === "Ok") {
-            var _p5 = _p4._0;
+      var _p2 = dateRes;
+      if (_p2.ctor === "Ok") {
+            var _p3 = _p2._0;
             return {ctor: "_Tuple3"
-                   ,_0: $Date.year(_p5)
-                   ,_1: monthToInt($Date.month(_p5))
-                   ,_2: $Date.day(_p5)};
+                   ,_0: $Date.year(_p3)
+                   ,_1: $Utils.monthToInt($Date.month(_p3))
+                   ,_2: $Date.day(_p3)};
          } else {
             return {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0};
          }
    };
    var extractEmail = function (model) {
-      var _p6 = model.email;
-      if (_p6.ctor === "Just") {
-            return _p6._0;
+      var _p4 = model.email;
+      if (_p4.ctor === "Just") {
+            return _p4._0;
          } else {
             return {from: "",to: "",title: "",body: "",date: ""};
          }
    };
    var showEmailBodyTrunc = function (model) {
-      var _p7 = model.itemtype;
-      if (_p7.ctor === "Email") {
+      var _p5 = model.itemtype;
+      if (_p5.ctor === "Email") {
             var email = extractEmail(model);
             return model.truncated ? truncate(email.body) : email.body;
          } else {
@@ -11899,8 +12316,8 @@ Elm.Item.make = function (_elm) {
          }
    };
    var viewEmail = F2(function (address,model) {
-      var _p8 = model.itemtype;
-      if (_p8.ctor === "Email") {
+      var _p6 = model.itemtype;
+      if (_p6.ctor === "Email") {
             var theStyle = genBorderStyle(model);
             var email = extractEmail(model);
             return _U.cmp($String.length(email.body),
@@ -11951,16 +12368,16 @@ Elm.Item.make = function (_elm) {
          }
    });
    var extractReminder = function (model) {
-      var _p9 = model.reminder;
-      if (_p9.ctor === "Just") {
-            return _p9._0;
+      var _p7 = model.reminder;
+      if (_p7.ctor === "Just") {
+            return _p7._0;
          } else {
-            return {body: "",created: ""};
+            return {body: "",created: "",deadline: ""};
          }
    };
    var extractDate = function (model) {
-      var _p10 = model.itemtype;
-      if (_p10.ctor === "Reminder") {
+      var _p8 = model.itemtype;
+      if (_p8.ctor === "Reminder") {
             var reminder = extractReminder(model);
             return extractDateReminder(reminder);
          } else {
@@ -11969,8 +12386,8 @@ Elm.Item.make = function (_elm) {
          }
    };
    var extractTitle = function (model) {
-      var _p11 = model.itemtype;
-      if (_p11.ctor === "Reminder") {
+      var _p9 = model.itemtype;
+      if (_p9.ctor === "Reminder") {
             var reminder = extractReminder(model);
             return extractTitleReminder(reminder);
          } else {
@@ -11978,10 +12395,33 @@ Elm.Item.make = function (_elm) {
             return extractTitleEmail(email);
          }
    };
+   var update = F2(function (action,model) {
+      var _p10 = action;
+      switch (_p10.ctor)
+      {case "ToggleDo": return model.done ? _U.update(model,
+           {done: false}) : _U.update(model,{done: true});
+         case "TogglePin": return model.pinned ? _U.update(model,
+           {pinned: false}) : _U.update(model,{pinned: true});
+         case "ToggleTruncate": return model.truncated ? _U.update(model,
+           {truncated: false}) : _U.update(model,{truncated: true});
+         case "TimeUpdate": var _p11 = model.itemtype;
+           if (_p11.ctor === "Reminder") {
+                 var theReminder = extractReminder(model);
+                 return _U.cmp(_p10._0,
+                 $Utils.dateStringToTime(theReminder.deadline)) > 0 ? _U.update(model,
+                 {deadlineExpired: true}) : _U.update(model,
+                 {deadlineExpired: false});
+              } else {
+                 return model;
+              }
+         default: return model;}
+   });
    var viewReminder = F2(function (address,model) {
       var _p12 = model.itemtype;
       if (_p12.ctor === "Reminder") {
-            var theStyle = genBorderStyle(model);
+            var theStyle = A2($List.append,
+            A2($List.append,genStyleExpired(model),genBorderStyle(model)),
+            genStyleFocusExpired(model));
             var reminder = extractReminder(model);
             return A2($Html.div,
             theStyle,
@@ -11997,6 +12437,11 @@ Elm.Item.make = function (_elm) {
                     _U.list([$Html.text(A2($String.append,
                     "\r\n\r\ndate: ",
                     reminder.created))]))
+                    ,A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    "\r\n\r\ndeadline: ",
+                    reminder.deadline))]))
                     ,A2($Html.br,_U.list([]),_U.list([]))]));
          } else {
             return A2($Html.div,_U.list([]),_U.list([]));
@@ -12010,14 +12455,15 @@ Elm.Item.make = function (_elm) {
             return A2(viewReminder,address,model);
          }
    });
-   var Model = F7(function (a,b,c,d,e,f,g) {
+   var Model = F8(function (a,b,c,d,e,f,g,h) {
       return {itemtype: a
              ,email: b
              ,reminder: c
              ,done: d
              ,pinned: e
              ,truncated: f
-             ,focus: g};
+             ,focus: g
+             ,deadlineExpired: h};
    });
    var Reminder = {ctor: "Reminder"};
    var initReminder = function (reminder) {
@@ -12027,7 +12473,8 @@ Elm.Item.make = function (_elm) {
              ,done: false
              ,pinned: false
              ,truncated: true
-             ,focus: false};
+             ,focus: false
+             ,deadlineExpired: false};
    };
    var Email = {ctor: "Email"};
    var initEmail = function (email) {
@@ -12037,7 +12484,8 @@ Elm.Item.make = function (_elm) {
              ,done: false
              ,pinned: false
              ,truncated: true
-             ,focus: false};
+             ,focus: false
+             ,deadlineExpired: false};
    };
    return _elm.Item.values = {_op: _op
                              ,initReminder: initReminder
@@ -12050,6 +12498,7 @@ Elm.Item.make = function (_elm) {
                              ,ToggleDo: ToggleDo
                              ,TogglePin: TogglePin
                              ,ToggleTruncate: ToggleTruncate
+                             ,TimeUpdate: TimeUpdate
                              ,NoOp: NoOp};
 };
 Elm.ItemList = Elm.ItemList || {};
@@ -12062,12 +12511,15 @@ Elm.ItemList.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $Item = Elm.Item.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Static = Elm.Static.make(_elm);
+   $Static = Elm.Static.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Utils = Elm.Utils.make(_elm);
    var _op = {};
    var takeDone$ = function (items) {
       takeDone$: while (true) {
@@ -12168,94 +12620,97 @@ Elm.ItemList.make = function (_elm) {
       var theItem = $List.head(inList);
       var _p16 = theItem;
       if (_p16.ctor === "Nothing") {
-            return $Item.initReminder({body: "",created: ""});
+            return $Item.initReminder({body: ""
+                                      ,created: ""
+                                      ,deadline: ""});
          } else {
             return _p16._0._2;
          }
    };
-   var reverseComparison = function (comp) {
-      var _p17 = comp;
-      switch (_p17.ctor)
-      {case "LT": return $Basics.GT;
-         case "GT": return $Basics.LT;
-         default: return $Basics.EQ;}
-   };
-   var compareDates = F2(function (_p19,_p18) {
-      var _p20 = _p19;
-      var _p27 = _p20._0;
-      var _p26 = _p20._1;
-      var _p25 = _p20._2;
-      var _p21 = _p18;
-      var _p24 = _p21._0;
-      var _p23 = _p21._1;
-      var _p22 = _p21._2;
-      return _U.cmp(_p27,_p24) < 0 ? $Basics.LT : _U.cmp(_p27,
-      _p24) > 0 ? $Basics.GT : _U.cmp(_p26,
-      _p23) < 0 ? $Basics.LT : _U.cmp(_p26,
-      _p23) > 0 ? $Basics.GT : _U.cmp(_p25,
-      _p22) < 0 ? $Basics.LT : _U.cmp(_p25,
-      _p22) > 0 ? $Basics.GT : $Basics.EQ;
-   });
-   var altComparison = F2(function (_p29,_p28) {
-      var _p30 = _p29;
-      var _p33 = _p30._2;
-      var _p31 = _p28;
-      var _p32 = _p31._2;
-      if (_p33.done && $Basics.not(_p32.done)) return $Basics.GT;
-      else if ($Basics.not(_p33.done) && _p32.done) return $Basics.LT;
+   var altComparison = F2(function (_p18,_p17) {
+      var _p19 = _p18;
+      var _p22 = _p19._2;
+      var _p20 = _p17;
+      var _p21 = _p20._2;
+      if (_p22.done && $Basics.not(_p21.done)) return $Basics.GT;
+      else if ($Basics.not(_p22.done) && _p21.done) return $Basics.LT;
          else {
-               var tupleTwo = $Item.extractDate(_p32);
-               var tupleOne = $Item.extractDate(_p33);
-               return reverseComparison(A2(compareDates,tupleOne,tupleTwo));
+               var tupleTwo = $Item.extractDate(_p21);
+               var tupleOne = $Item.extractDate(_p22);
+               return $Utils.reverseComparison(A2($Utils.compareDates,
+               tupleOne,
+               tupleTwo));
             }
    });
-   var mainComparison = F2(function (_p35,_p34) {
-      var _p36 = _p35;
-      var _p39 = _p36._2;
-      var _p37 = _p34;
-      var _p38 = _p37._2;
-      if (_p39.done && $Basics.not(_p38.done)) return $Basics.GT;
-      else if ($Basics.not(_p39.done) && _p38.done) return $Basics.LT;
-         else if (_p39.pinned && $Basics.not(_p38.pinned))
+   var mainComparison = F2(function (_p24,_p23) {
+      var _p25 = _p24;
+      var _p28 = _p25._2;
+      var _p26 = _p23;
+      var _p27 = _p26._2;
+      if (_p28.done && $Basics.not(_p27.done)) return $Basics.GT;
+      else if ($Basics.not(_p28.done) && _p27.done) return $Basics.LT;
+         else if (_p28.pinned && $Basics.not(_p27.pinned))
             return $Basics.LT;
-            else if ($Basics.not(_p39.pinned) && _p38.pinned)
+            else if ($Basics.not(_p28.pinned) && _p27.pinned)
                return $Basics.GT; else {
-                     var tupleTwo = $Item.extractDate(_p38);
-                     var tupleOne = $Item.extractDate(_p39);
-                     return A2(compareDates,tupleOne,tupleTwo);
+                     var tupleTwo = $Item.extractDate(_p27);
+                     var tupleOne = $Item.extractDate(_p28);
+                     return A2($Utils.compareDates,tupleOne,tupleTwo);
                   }
    });
+   var focusListIndex = function (model) {
+      var theItems = A2($List.map,
+      function (_p29) {
+         var _p30 = _p29;
+         return _p30._2;
+      },
+      model.items);
+      var filterDones = model.hideDone ? A2($List.filter,
+      function (x) {
+         return $Basics.not(x.done);
+      },
+      theItems) : theItems;
+      return $List.length(filterDones);
+   };
    var fixFocus$ = F3(function (acc,focusID,itemList) {
       var rest = $List.tail(itemList);
       var first = $List.head(itemList);
-      var _p40 = first;
-      if (_p40.ctor === "Nothing") {
+      var _p31 = first;
+      if (_p31.ctor === "Nothing") {
             return _U.list([]);
          } else {
-            var _p43 = _p40._0._2;
-            var _p42 = _p40._0._0;
-            var fixedModel = _U.eq(focusID,acc) ? _U.update(_p43,
-            {focus: true}) : _U.update(_p43,{focus: false});
-            var fixedItem = _U.eq(focusID,_p42) ? {ctor: "_Tuple3"
-                                                  ,_0: _p42
+            var _p34 = _p31._0._2;
+            var _p33 = _p31._0._0;
+            var fixedModel = _U.eq(focusID,acc) ? _U.update(_p34,
+            {focus: true}) : _U.update(_p34,{focus: false});
+            var fixedItem = _U.eq(focusID,_p33) ? {ctor: "_Tuple3"
+                                                  ,_0: _p33
                                                   ,_1: true
                                                   ,_2: fixedModel} : {ctor: "_Tuple3"
-                                                                     ,_0: _p42
+                                                                     ,_0: _p33
                                                                      ,_1: false
                                                                      ,_2: fixedModel};
-            var _p41 = rest;
-            if (_p41.ctor === "Nothing") {
+            var _p32 = rest;
+            if (_p32.ctor === "Nothing") {
                   return _U.list([fixedItem]);
                } else {
                   return A2($List._op["::"],
                   fixedItem,
-                  A3(fixFocus$,acc + 1,focusID,_p41._0));
+                  A3(fixFocus$,acc + 1,focusID,_p32._0));
                }
          }
    });
    var fixFocus = function (model) {
-      var newList = A3(fixFocus$,0,model.focusOn,model.items);
-      return _U.update(model,{items: newList});
+      var maxFocusLength = focusListIndex(model);
+      var newModel = function () {
+         if (_U.cmp(model.focusOn,maxFocusLength) > -1) {
+               var newFocusOn = _U.eq(maxFocusLength,
+               0) ? 0 : maxFocusLength - 1;
+               return _U.update(model,{focusOn: newFocusOn});
+            } else return model;
+      }();
+      var newList = A3(fixFocus$,0,newModel.focusOn,newModel.items);
+      return _U.update(newModel,{items: newList});
    };
    var altSort = function (model) {
       var newModel = _U.update(model,
@@ -12276,6 +12731,10 @@ Elm.ItemList.make = function (_elm) {
       var newModel = _U.update(model,{items: newItems});
       return newModel.altSort ? altSort(newModel) : mainSort(newModel);
    });
+   var TimeUpdate = function (a) {
+      return {ctor: "TimeUpdate",_0: a};
+   };
+   var ToggleHideDone = {ctor: "ToggleHideDone"};
    var DoneCurrent = {ctor: "DoneCurrent"};
    var PinCurrent = {ctor: "PinCurrent"};
    var TruncateCurrent = {ctor: "TruncateCurrent"};
@@ -12283,32 +12742,35 @@ Elm.ItemList.make = function (_elm) {
    var FixFocus = {ctor: "FixFocus"};
    var MainSort = {ctor: "MainSort"};
    var AltSort = {ctor: "AltSort"};
+   var ToggleHideAddReminder = {ctor: "ToggleHideAddReminder"};
    var ModifyAddReminder = function (a) {
       return {ctor: "ModifyAddReminder",_0: a};
    };
    var Modify = F2(function (a,b) {
       return {ctor: "Modify",_0: a,_1: b};
    });
-   var viewItem = F2(function (address,_p44) {
-      var _p45 = _p44;
+   var viewItem = F2(function (address,_p35) {
+      var _p36 = _p35;
       return A2($Item.view,
-      A2($Signal.forwardTo,address,Modify(_p45._0)),
-      _p45._2);
+      A2($Signal.forwardTo,address,Modify(_p36._0)),
+      _p36._2);
    });
-   var genDiv = F2(function (address,_p46) {
-      var _p47 = _p46;
+   var genDiv = F2(function (address,_p37) {
+      var _p38 = _p37;
       return A2($Html.div,
       _U.list([]),
       _U.list([A2(viewItem,
       address,
-      {ctor: "_Tuple3",_0: _p47._0,_1: _p47._1,_2: _p47._2})]));
+      {ctor: "_Tuple3",_0: _p38._0,_1: _p38._1,_2: _p38._2})]));
    });
    var view = F2(function (address,model) {
       var addReminderView = A2($AddReminder.view,
       A2($Signal.forwardTo,address,ModifyAddReminder),
       model.addReminder);
       var dones = takeDone(model);
-      var doneHtml = A2($List.map,genDiv(address),dones);
+      var doneHtml = model.hideDone ? _U.list([]) : A2($List.map,
+      genDiv(address),
+      dones);
       var todos = takeTodo(model);
       var todoHtml = A2($List.map,genDiv(address),todos);
       return A2($Html.div,
@@ -12325,9 +12787,10 @@ Elm.ItemList.make = function (_elm) {
       todoHtml),
       _U.list([A2($Html.div,
       _U.list([]),
-      _U.list([A2($Html.h1,
-      _U.list([]),
-      _U.list([$Html.text("Done")]))]))])),
+      _U.list([A2($Html.h1,_U.list([]),_U.list([$Html.text("Done")]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,ToggleHideDone)]),
+              _U.list([$Html.text("Toggle Hide Done Items")]))]))])),
       doneHtml),
       _U.list([A2($Html.div,
       _U.list([]),
@@ -12342,78 +12805,67 @@ Elm.ItemList.make = function (_elm) {
       return {ctor: "AddReminder",_0: a};
    };
    var update = F2(function (action,model) {
-      var _p48 = action;
-      switch (_p48.ctor)
+      var _p39 = action;
+      switch (_p39.ctor)
       {case "AddReminder":
-         var reminderModel = $Item.initReminder(_p48._0);
-           var newModel = {items: A2($List._op["::"],
-                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: reminderModel},
-                          model.items)
-                          ,nextID: model.nextID + 1
-                          ,focusOn: model.focusOn
-                          ,addReminder: model.addReminder
-                          ,altSort: model.altSort};
+         var reminderModel = $Item.initReminder(_p39._0);
+           var newModel = _U.update(model,
+           {items: A2($List._op["::"],
+           {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: reminderModel},
+           model.items)
+           ,nextID: model.nextID + 1});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "AddEmail": var emailModel = $Item.initEmail(_p48._0);
-           var newModel = {items: A2($List._op["::"],
-                          {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: emailModel},
-                          model.items)
-                          ,nextID: model.nextID + 1
-                          ,focusOn: model.focusOn
-                          ,addReminder: model.addReminder
-                          ,altSort: model.altSort};
+         case "AddEmail": var emailModel = $Item.initEmail(_p39._0);
+           var newModel = _U.update(model,
+           {items: A2($List._op["::"],
+           {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: emailModel},
+           model.items)
+           ,nextID: model.nextID + 1});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
          case "NextFocus": var nextFocus = A2($Basics._op["%"],
            model.focusOn + 1,
-           $List.length(model.items));
-           var newModel = {items: model.items
-                          ,nextID: model.nextID
-                          ,focusOn: nextFocus
-                          ,addReminder: model.addReminder
-                          ,altSort: model.altSort};
+           focusListIndex(model));
+           var newModel = _U.update(model,{focusOn: nextFocus});
            return fixFocus(newModel);
          case "PreviousFocus": var nextFocus = _U.cmp(model.focusOn - 1,
-           0) < 0 ? _U.eq($List.length(model.items),
-           0) ? 0 : $List.length(model.items) - 1 : model.focusOn - 1;
-           var newModel = {items: model.items
-                          ,nextID: model.nextID
-                          ,focusOn: nextFocus
-                          ,addReminder: model.addReminder
-                          ,altSort: model.altSort};
+           0) < 0 ? _U.eq(focusListIndex(model),
+           0) ? 0 : focusListIndex(model) - 1 : model.focusOn - 1;
+           var newModel = _U.update(model,{focusOn: nextFocus});
            return fixFocus(newModel);
-         case "Modify": var updateModel = function (_p49) {
-              var _p50 = _p49;
-              var _p53 = _p50._0;
-              var _p52 = _p50._2;
-              var _p51 = _p50._1;
-              return _U.eq(_p53,_p48._0) ? {ctor: "_Tuple3"
-                                           ,_0: _p53
-                                           ,_1: _p51
-                                           ,_2: A2($Item.update,_p48._1,_p52)} : {ctor: "_Tuple3"
-                                                                                 ,_0: _p53
-                                                                                 ,_1: _p51
-                                                                                 ,_2: _p52};
+         case "Modify": var updateModel = function (_p40) {
+              var _p41 = _p40;
+              var _p44 = _p41._0;
+              var _p43 = _p41._2;
+              var _p42 = _p41._1;
+              return _U.eq(_p44,_p39._0) ? {ctor: "_Tuple3"
+                                           ,_0: _p44
+                                           ,_1: _p42
+                                           ,_2: A2($Item.update,_p39._1,_p43)} : {ctor: "_Tuple3"
+                                                                                 ,_0: _p44
+                                                                                 ,_1: _p42
+                                                                                 ,_2: _p43};
            };
-           var newModel = {items: A2($List.map,updateModel,model.items)
-                          ,nextID: model.nextID
-                          ,focusOn: model.focusOn
-                          ,addReminder: model.addReminder
-                          ,altSort: model.altSort};
+           var newModel = _U.update(model,
+           {items: A2($List.map,updateModel,model.items)});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "ModifyAddReminder": var _p55 = _p48._0;
+         case "ModifyAddReminder": var _p46 = _p39._0;
            var updatedModel = function () {
-              var _p54 = _p55;
-              if (_p54.ctor === "AddReminder") {
-                    return A2(update,AddReminder(_p54._0),model);
+              var _p45 = _p46;
+              if (_p45.ctor === "AddReminder") {
+                    return A2(update,AddReminder(_p45._0),model);
                  } else {
                     return model;
                  }
            }();
            var updatedAddReminder = A2($AddReminder.update,
-           _p55,
+           _p46,
            model.addReminder);
            return _U.update(updatedModel,
            {addReminder: updatedAddReminder});
+         case "ToggleHideAddReminder": return _U.update(model,
+           {addReminder: A2($AddReminder.update,
+           $AddReminder.ToggleHide,
+           model.addReminder)});
          case "AltSort": var newModel = _U.update(model,{altSort: true});
            return altSort(newModel);
          case "MainSort": var newModel = _U.update(model,
@@ -12426,25 +12878,47 @@ Elm.ItemList.make = function (_elm) {
            return A2(itemActionCurrent,$Item.TogglePin,model);
          case "DoneCurrent": var curr = currentItem(model);
            return A2(itemActionCurrent,$Item.ToggleDo,model);
+         case "ToggleHideDone":
+         var notHideDone = $Basics.not(model.hideDone);
+           var newModel = _U.update(model,{hideDone: notHideDone});
+           return fixFocus(newModel);
+         case "TimeUpdate": var _p49 = _p39._0;
+           var theItems = A2($List.map,
+           function (_p47) {
+              var _p48 = _p47;
+              return {ctor: "_Tuple3"
+                     ,_0: _p48._0
+                     ,_1: _p48._1
+                     ,_2: A2($Item.update,$Item.TimeUpdate(_p49),_p48._2)};
+           },
+           model.items);
+           var newModel = _U.update(model,
+           {items: theItems
+           ,addReminder: A2($AddReminder.update,
+           $AddReminder.TimeUpdate(_p49),
+           model.addReminder)});
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
          default: return model;}
    });
    var initEmpty = {items: _U.list([])
                    ,nextID: 0
                    ,focusOn: 0
-                   ,addReminder: $AddReminder.init
-                   ,altSort: false};
+                   ,addReminder: $AddReminder.init(false)
+                   ,altSort: false
+                   ,hideDone: false};
    var init = function () {
       var addEmails = A2($List.map,AddEmail,$Static.emails);
       var addReminders = A2($List.map,AddReminder,$Static.reminders);
       var updates = A2($List.append,addReminders,addEmails);
       return A3($List.foldl,update,initEmpty,updates);
    }();
-   var Model = F5(function (a,b,c,d,e) {
+   var Model = F6(function (a,b,c,d,e,f) {
       return {items: a
              ,nextID: b
              ,focusOn: c
              ,addReminder: d
-             ,altSort: e};
+             ,altSort: e
+             ,hideDone: f};
    });
    var actionMailBox = $Signal.mailbox(NoOp);
    var actions = actionMailBox.signal;
@@ -12464,13 +12938,16 @@ Elm.ItemList.make = function (_elm) {
                                  ,PreviousFocus: PreviousFocus
                                  ,Modify: Modify
                                  ,ModifyAddReminder: ModifyAddReminder
+                                 ,ToggleHideAddReminder: ToggleHideAddReminder
                                  ,AltSort: AltSort
                                  ,MainSort: MainSort
                                  ,FixFocus: FixFocus
                                  ,NoOp: NoOp
                                  ,TruncateCurrent: TruncateCurrent
                                  ,PinCurrent: PinCurrent
-                                 ,DoneCurrent: DoneCurrent};
+                                 ,DoneCurrent: DoneCurrent
+                                 ,ToggleHideDone: ToggleHideDone
+                                 ,TimeUpdate: TimeUpdate};
 };
 Elm.Set = Elm.Set || {};
 Elm.Set.make = function (_elm) {
@@ -12797,13 +13274,21 @@ Elm.KeyboardInput.make = function (_elm) {
    var toAltSort = A2(keyToAction,
    $ItemList.AltSort,
    keyWithAlt(_U.chr("s")));
+   var toHideAddReminder = A2(keyToAction,
+   $ItemList.ToggleHideAddReminder,
+   keyWithAlt(_U.chr("h")));
+   var toHideDoneItems = A2(keyToAction,
+   $ItemList.ToggleHideDone,
+   keyWithAlt(_U.chr("i")));
    var keyboardInput = $Signal.mergeMany(_U.list([toNext
                                                  ,toPrevious
                                                  ,toAltSort
                                                  ,toMainSort
                                                  ,toTruncate
                                                  ,toPin
-                                                 ,toDone]));
+                                                 ,toDone
+                                                 ,toHideDoneItems
+                                                 ,toHideAddReminder]));
    return _elm.KeyboardInput.values = {_op: _op
                                       ,keyWithAlt: keyWithAlt
                                       ,keyWithAltRelease: keyWithAltRelease
@@ -12815,8 +13300,93 @@ Elm.KeyboardInput.make = function (_elm) {
                                       ,toDone: toDone
                                       ,toAltSort: toAltSort
                                       ,toMainSort: toMainSort
+                                      ,toHideAddReminder: toHideAddReminder
+                                      ,toHideDoneItems: toHideDoneItems
                                       ,keyboardInput: keyboardInput
                                       ,watchSignal: watchSignal};
+};
+Elm.Native.CurrentTime = {};
+
+Elm.Native.CurrentTime.make = function(localRuntime) {
+
+  localRuntime.Native = localRuntime.Native || {};
+
+
+  localRuntime.Native.CurrentTime = localRuntime.Native.CurrentTime || {};
+
+  if (localRuntime.Native.CurrentTime.values) {
+    return localRuntime.Native.CurrentTime.values;
+  }
+
+  //var Result = Elm.Result.make(localRuntime);
+
+  return localRuntime.Native.CurrentTime.values = {
+    loadTime: (new window.Date).getTime()
+  };
+
+};
+Elm.TimeKeeper = Elm.TimeKeeper || {};
+Elm.TimeKeeper.make = function (_elm) {
+   "use strict";
+   _elm.TimeKeeper = _elm.TimeKeeper || {};
+   if (_elm.TimeKeeper.values) return _elm.TimeKeeper.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Date$Format = Elm.Date.Format.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $ItemList = Elm.ItemList.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$CurrentTime = Elm.Native.CurrentTime.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var toItemListAction = function (model) {
+      return $ItemList.TimeUpdate(model.currentTime);
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      if (_p0.ctor === "AddMillisecond") {
+            return _U.update(model,
+            {currentTime: model.currentTime + $Time.millisecond});
+         } else {
+            return model;
+         }
+   });
+   var NoOp = {ctor: "NoOp"};
+   var AddMillisecond = {ctor: "AddMillisecond"};
+   var timeMailBox = $Signal.mailbox(NoOp);
+   var timeAddress = timeMailBox.address;
+   var timeActions = timeMailBox.signal;
+   var getCurrentDate = function (model) {
+      return $Date.fromTime(model.currentTime);
+   };
+   var view = function (model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([$Html.text($Basics.toString(A2($Date$Format.format,
+      "%Y-%m-%d",
+      getCurrentDate(model))))]));
+   };
+   var loadTime = $Native$CurrentTime.loadTime;
+   var init = {currentTime: loadTime};
+   var state = A3($Signal.foldp,update,init,timeActions);
+   var Model = function (a) {    return {currentTime: a};};
+   return _elm.TimeKeeper.values = {_op: _op
+                                   ,init: init
+                                   ,state: state
+                                   ,update: update
+                                   ,timeAddress: timeAddress
+                                   ,timeActions: timeActions
+                                   ,view: view
+                                   ,loadTime: loadTime
+                                   ,toItemListAction: toItemListAction
+                                   ,Model: Model
+                                   ,AddMillisecond: AddMillisecond
+                                   ,NoOp: NoOp};
 };
 Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
@@ -12824,7 +13394,6 @@ Elm.Main.make = function (_elm) {
    _elm.Main = _elm.Main || {};
    if (_elm.Main.values) return _elm.Main.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $AddReminder = Elm.AddReminder.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
@@ -12833,38 +13402,29 @@ Elm.Main.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $TimeKeeper = Elm.TimeKeeper.make(_elm);
    var _op = {};
-   var addReminderToListAction = function () {
-      var extractReminder = function (action) {
-         var _p0 = action;
-         if (_p0.ctor === "AddReminder") {
-               return $ItemList.AddReminder(_p0._0);
-            } else {
-               return $ItemList.NoOp;
-            }
-      };
-      var filterAdd = function (action) {
-         var _p1 = action;
-         if (_p1.ctor === "AddReminder") {
-               return true;
-            } else {
-               return false;
-            }
-      };
-      return A2($Signal.map,
-      extractReminder,
-      A3($Signal.filter,
-      filterAdd,
-      $AddReminder.NoOp,
-      $AddReminder.reminderActions));
-   }();
+   var watchSignal = function (caption) {
+      return $Signal.map($Debug.watch(caption));
+   };
+   var timeKeeperState = A3($Signal.foldp,
+   $TimeKeeper.update,
+   $TimeKeeper.init,
+   A2($Signal.map,
+   function (x) {
+      return $TimeKeeper.AddMillisecond;
+   },
+   $Time.every($Time.millisecond)));
    var itemListState = A3($Signal.foldp,
    $ItemList.update,
    $ItemList.init,
-   $Signal.mergeMany(_U.list([addReminderToListAction
-                             ,$ItemList.actions
-                             ,$KeyboardInput.keyboardInput])));
+   $Signal.mergeMany(_U.list([$ItemList.actions
+                             ,$KeyboardInput.keyboardInput
+                             ,A2($Signal.map,
+                             $TimeKeeper.toItemListAction,
+                             timeKeeperState)])));
    var main = function () {
       var viewFeed = A2($Signal.map,
       $ItemList.view($ItemList.actionAddress),
@@ -12874,5 +13434,6 @@ Elm.Main.make = function (_elm) {
    return _elm.Main.values = {_op: _op
                              ,main: main
                              ,itemListState: itemListState
-                             ,addReminderToListAction: addReminderToListAction};
+                             ,timeKeeperState: timeKeeperState
+                             ,watchSignal: watchSignal};
 };

@@ -62,7 +62,7 @@ initEmpty =
   , addReminder = AddReminder.init False
   , altSort = False
   , hideDone = False
-  }
+    }
 
 {--
 init : Model
@@ -290,6 +290,7 @@ update action model =
         newModel =
           { model |
               items = theItems
+          ,   addReminder = AddReminder.update (AddReminder.TimeUpdate time) model.addReminder
           }
       in
         if newModel.altSort then

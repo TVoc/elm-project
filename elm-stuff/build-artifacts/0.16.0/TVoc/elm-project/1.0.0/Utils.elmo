@@ -12,6 +12,7 @@ Elm.Utils.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
    $Time = Elm.Time.make(_elm);
    var _op = {};
    var reverseComparison = function (comp) {
@@ -62,13 +63,26 @@ Elm.Utils.make = function (_elm) {
             return -1;
          }
    };
-   var timeToDateString = function (time) {
+   var timeToDateStringReverse = function (time) {
       return $Basics.toString(A2($Date$Format.format,
+      "%d-%m-%Y",
+      $Date.fromTime(time)));
+   };
+   var timeToDateString = function (time) {
+      var baseString = $Basics.toString(A2($Date$Format.format,
       "%Y-%m-%d",
       $Date.fromTime(time)));
+      var fromRight = A2($String.right,
+      $String.length(baseString) - 1,
+      baseString);
+      var fromLeft = A2($String.left,
+      $String.length(fromRight) - 1,
+      fromRight);
+      return fromLeft;
    };
    return _elm.Utils.values = {_op: _op
                               ,timeToDateString: timeToDateString
+                              ,timeToDateStringReverse: timeToDateStringReverse
                               ,dateStringToTime: dateStringToTime
                               ,monthToInt: monthToInt
                               ,compareDates: compareDates

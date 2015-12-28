@@ -12,7 +12,9 @@ Elm.AddReminder.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Utils = Elm.Utils.make(_elm);
    var _op = {};
    var fieldInput = F4(function (fieldType,
    address,
@@ -38,6 +40,9 @@ Elm.AddReminder.make = function (_elm) {
              ,deadline: model.deadline};
    };
    var NoOp = {ctor: "NoOp"};
+   var TimeUpdate = function (a) {
+      return {ctor: "TimeUpdate",_0: a};
+   };
    var ToggleHide = {ctor: "ToggleHide"};
    var hideButton = F2(function (address,model) {
       return model.hide ? A2($Html.button,
@@ -93,25 +98,33 @@ Elm.AddReminder.make = function (_elm) {
       return {body: ""
              ,created: "2015-01-01"
              ,deadline: "2015-01-02"
-             ,hide: hideIt};
+             ,hide: hideIt
+             ,defaultDate: true};
    };
    var update = F2(function (action,model) {
       var _p0 = action;
       switch (_p0.ctor)
       {case "ChangeBody": return _U.update(model,{body: _p0._0});
-         case "ChangeCreated": return _U.update(model,{created: _p0._0});
+         case "ChangeCreated": return _U.update(model,
+           {created: _p0._0,defaultDate: false});
          case "ChangeDeadline": return _U.update(model,
            {deadline: _p0._0});
          case "AddReminder": return init(_p0._1);
          case "ToggleHide": var notHide = $Basics.not(model.hide);
            return _U.update(model,{hide: notHide});
+         case "TimeUpdate": return model.defaultDate ? _U.update(model,
+           {created: $Utils.timeToDateString(_p0._0)}) : model;
          default: return model;}
    });
    var Output = F3(function (a,b,c) {
       return {body: a,created: b,deadline: c};
    });
-   var Model = F4(function (a,b,c,d) {
-      return {body: a,created: b,deadline: c,hide: d};
+   var Model = F5(function (a,b,c,d,e) {
+      return {body: a
+             ,created: b
+             ,deadline: c
+             ,hide: d
+             ,defaultDate: e};
    });
    return _elm.AddReminder.values = {_op: _op
                                     ,init: init
@@ -123,5 +136,6 @@ Elm.AddReminder.make = function (_elm) {
                                     ,ChangeDeadline: ChangeDeadline
                                     ,AddReminder: AddReminder
                                     ,ToggleHide: ToggleHide
+                                    ,TimeUpdate: TimeUpdate
                                     ,NoOp: NoOp};
 };

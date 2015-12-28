@@ -4,6 +4,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, targetValue)
 import Html.Events exposing (onClick)
+import Time exposing (Time)
+import Utils
 
 -- MODEL
 
@@ -12,6 +14,7 @@ type alias Model =
   , created : String
   , deadline : String
   , hide : Bool
+  , defaultDate : Bool
   }
 
 type alias Output =
@@ -26,6 +29,7 @@ init hideIt =
   , created = "2015-01-01"
   , deadline = "2015-01-02"
   , hide = hideIt
+  , defaultDate = True
   }
 
 {--
@@ -54,6 +58,7 @@ type Action
   | ChangeDeadline String
   | AddReminder Output Bool
   | ToggleHide
+  | TimeUpdate Time
   | NoOp
 
 update : Action -> Model -> Model
@@ -66,6 +71,7 @@ update action model =
     ChangeCreated newCreated ->
       { model |
           created = newCreated
+      ,   defaultDate = False
       }
     ChangeDeadline newDeadline ->
       { model |
@@ -80,6 +86,13 @@ update action model =
         { model |
             hide = notHide
         }
+    TimeUpdate time ->
+      if model.defaultDate then
+        { model |
+            created = Utils.timeToDateString time
+        }
+      else
+        model
     NoOp ->
       model
 

@@ -3,10 +3,51 @@ module Utils where
 import Date.Format
 import Date exposing (..)
 import Time exposing (..)
+import String
 
+{--}
 timeToDateString : Time -> String
 timeToDateString time =
-  toString <| Date.Format.format "%Y-%m-%d" <| Date.fromTime time
+  let
+    baseString =
+      toString <| Date.Format.format "%Y-%m-%d" <| Date.fromTime time
+    fromRight =
+      String.right ((String.length baseString) - 1) baseString
+    fromLeft =
+      String.left ((String.length fromRight) - 1) fromRight
+  in
+    fromLeft
+
+--}
+
+{--
+timeToDateString : Time -> String
+timeToDateString time =
+  let
+    date = Date.fromTime time
+    year =
+      toString <| Date.year date
+    month =
+      monthToInt (Date.month date)
+    monthFixed =
+      if month < 10 then
+        "0" `String.append` (toString month)
+      else
+        toString month
+    day =
+      Date.day date
+    dayFixed =
+      if day < 10 then
+        "0" `String.append` (toString day)
+      else
+        toString month
+  in
+    year `String.append` "-" `String.append` monthFixed `String.append` "-" `String.append` dayFixed
+--}
+
+timeToDateStringReverse : Time -> String
+timeToDateStringReverse time =
+  toString <| Date.Format.format "%d-%m-%Y" <| Date.fromTime time
 
 dateStringToTime : String -> Time
 dateStringToTime dateString =

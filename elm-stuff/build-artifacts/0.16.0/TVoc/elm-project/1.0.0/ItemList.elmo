@@ -379,16 +379,21 @@ Elm.ItemList.make = function (_elm) {
          var notHideDone = $Basics.not(model.hideDone);
            var newModel = _U.update(model,{hideDone: notHideDone});
            return fixFocus(newModel);
-         case "TimeUpdate": var theItems = A2($List.map,
+         case "TimeUpdate": var _p49 = _p39._0;
+           var theItems = A2($List.map,
            function (_p47) {
               var _p48 = _p47;
               return {ctor: "_Tuple3"
                      ,_0: _p48._0
                      ,_1: _p48._1
-                     ,_2: A2($Item.update,$Item.TimeUpdate(_p39._0),_p48._2)};
+                     ,_2: A2($Item.update,$Item.TimeUpdate(_p49),_p48._2)};
            },
            model.items);
-           var newModel = _U.update(model,{items: theItems});
+           var newModel = _U.update(model,
+           {items: theItems
+           ,addReminder: A2($AddReminder.update,
+           $AddReminder.TimeUpdate(_p49),
+           model.addReminder)});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
          default: return model;}
    });
