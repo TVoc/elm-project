@@ -12794,6 +12794,9 @@ Elm.KeyboardInput.make = function (_elm) {
    var toHideAddReminder = A2(keyToAction,
    $ItemList.ToggleHideAddReminder,
    keyWithAlt(_U.chr("h")));
+   var toHideDoneItems = A2(keyToAction,
+   $ItemList.ToggleHideDone,
+   keyWithAlt(_U.chr("i")));
    var keyboardInput = $Signal.mergeMany(_U.list([toNext
                                                  ,toPrevious
                                                  ,toAltSort
@@ -12801,6 +12804,7 @@ Elm.KeyboardInput.make = function (_elm) {
                                                  ,toTruncate
                                                  ,toPin
                                                  ,toDone
+                                                 ,toHideDoneItems
                                                  ,toHideAddReminder]));
    return _elm.KeyboardInput.values = {_op: _op
                                       ,keyWithAlt: keyWithAlt
@@ -12814,6 +12818,7 @@ Elm.KeyboardInput.make = function (_elm) {
                                       ,toAltSort: toAltSort
                                       ,toMainSort: toMainSort
                                       ,toHideAddReminder: toHideAddReminder
+                                      ,toHideDoneItems: toHideDoneItems
                                       ,keyboardInput: keyboardInput
                                       ,watchSignal: watchSignal};
 };Elm.Main = Elm.Main || {};
