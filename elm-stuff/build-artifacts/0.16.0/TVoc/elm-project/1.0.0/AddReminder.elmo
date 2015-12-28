@@ -33,7 +33,9 @@ Elm.AddReminder.make = function (_elm) {
               _U.list([]))]));
    });
    var takeOutput = function (model) {
-      return {body: model.body,created: model.created};
+      return {body: model.body
+             ,created: model.created
+             ,deadline: model.deadline};
    };
    var NoOp = {ctor: "NoOp"};
    var ToggleHide = {ctor: "ToggleHide"};
@@ -54,6 +56,9 @@ Elm.AddReminder.make = function (_elm) {
       A2(AddReminder,takeOutput(model),model.hide))]),
       _U.list([$Html.text("Add")]));
    });
+   var ChangeDeadline = function (a) {
+      return {ctor: "ChangeDeadline",_0: a};
+   };
    var ChangeCreated = function (a) {
       return {ctor: "ChangeCreated",_0: a};
    };
@@ -69,29 +74,44 @@ Elm.AddReminder.make = function (_elm) {
       _U.list([]),
       _U.list([A2($Html.div,
       _U.list([]),
-      _U.list([A4(fieldInput,"text",address,ChangeBody,model.body)
-              ,A4(fieldInput,"date",address,ChangeCreated,model.created)
+      _U.list([A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Reminder: ")
+                      ,A4(fieldInput,"text",address,ChangeBody,model.body)]))
+              ,A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Created: ")
+                      ,A4(fieldInput,"date",address,ChangeCreated,model.created)]))
+              ,A2($Html.div,
+              _U.list([]),
+              _U.list([$Html.text("Deadline: ")
+                      ,A4(fieldInput,"date",address,ChangeDeadline,model.deadline)]))
               ,A2(submitButton,address,model)
               ,A2(hideButton,address,model)]))]));
    });
    var init = function (hideIt) {
-      return {body: "",created: "2015-01-01",hide: hideIt};
+      return {body: ""
+             ,created: "2015-01-01"
+             ,deadline: "2015-01-02"
+             ,hide: hideIt};
    };
    var update = F2(function (action,model) {
       var _p0 = action;
       switch (_p0.ctor)
       {case "ChangeBody": return _U.update(model,{body: _p0._0});
          case "ChangeCreated": return _U.update(model,{created: _p0._0});
+         case "ChangeDeadline": return _U.update(model,
+           {deadline: _p0._0});
          case "AddReminder": return init(_p0._1);
          case "ToggleHide": var notHide = $Basics.not(model.hide);
            return _U.update(model,{hide: notHide});
          default: return model;}
    });
-   var Output = F2(function (a,b) {
-      return {body: a,created: b};
+   var Output = F3(function (a,b,c) {
+      return {body: a,created: b,deadline: c};
    });
-   var Model = F3(function (a,b,c) {
-      return {body: a,created: b,hide: c};
+   var Model = F4(function (a,b,c,d) {
+      return {body: a,created: b,deadline: c,hide: d};
    });
    return _elm.AddReminder.values = {_op: _op
                                     ,init: init
@@ -100,6 +120,7 @@ Elm.AddReminder.make = function (_elm) {
                                     ,Model: Model
                                     ,ChangeBody: ChangeBody
                                     ,ChangeCreated: ChangeCreated
+                                    ,ChangeDeadline: ChangeDeadline
                                     ,AddReminder: AddReminder
                                     ,ToggleHide: ToggleHide
                                     ,NoOp: NoOp};

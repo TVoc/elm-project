@@ -5,6 +5,10 @@ import ItemList
 import Signal
 import KeyboardInput
 import AddReminder
+import TimeKeeper
+import Graphics.Element exposing (show)
+import Time
+import Utils
 
 -- Name:
 -- Student ID:
@@ -73,38 +77,20 @@ main =
     viewFeed
 --}
 
+{--
+
+main =
+  show (Utils.dateStringToTime "2015-12-28")
+  --}
+
 itemListState : Signal ItemList.Model
 itemListState =
-  Signal.foldp ItemList.update ItemList.init (Signal.merge ItemList.actions KeyboardInput.keyboardInput)
+  Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [ItemList.actions, KeyboardInput.keyboardInput, Signal.map TimeKeeper.toItemListAction timeKeeperState])
 
-{--
-addReminderToListAction : Signal ItemList.Action
-addReminderToListAction =
-  let
-    filterAdd action =
-      case action of
-        AddReminder.AddReminder _ ->
-          True
-        _ ->
-          False
-    extractReminder action =
-      case action of
-        AddReminder.AddReminder model ->
-          ItemList.AddReminder model
-        _ ->
-          ItemList.NoOp
-  in
-  Signal.map extractReminder  <| Signal.filter filterAdd AddReminder.NoOp AddReminder.reminderActions
---}
+timeKeeperState : Signal TimeKeeper.Model
+timeKeeperState =
+  Signal.foldp TimeKeeper.update TimeKeeper.init (Signal.map (\x -> TimeKeeper.AddMillisecond) (Time.every Time.millisecond))
 
-{--
-view : Html
-view =
-  let
-    viewItemList =
-      ItemList.view ItemList.actionAddress ItemList.init
-    viewAddReminder =
-      AddReminder.view AddReminder.reminderAddress AddReminder.init
-  in
-    div [] [viewItemList, viewAddReminder]
+watchSignal : String -> Signal a -> Signal a
+watchSignal caption = Signal.map (Debug.watch caption)
 --}

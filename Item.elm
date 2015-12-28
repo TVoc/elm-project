@@ -6,6 +6,8 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing(..)
 import Date
+import Utils
+import Time exposing (Time)
 
 {--}
 -- MAIN
@@ -48,6 +50,7 @@ type alias Model =
   , pinned : Bool
   , truncated : Bool
   , focus : Bool
+  , deadlineExpired : Bool
   }
 
 {--
@@ -62,6 +65,7 @@ initReminder reminder =
     , pinned = False
     , truncated = True
     , focus = False
+    , deadlineExpired = False
   }
 
 initEmail : Static.Email -> Model
@@ -73,6 +77,7 @@ initEmail email =
     , pinned = False
     , truncated = True
     , focus = False
+    , deadlineExpired = False
   }
 
 extractReminder : Model -> Static.Reminder
@@ -81,7 +86,7 @@ extractReminder model =
     Just reminder
       -> reminder
     Nothing
-      -> { body = "", created = "" }
+      -> { body = "", created = "", deadline = "" }
 
 extractEmail : Model -> Static.Email
 extractEmail model =
@@ -112,7 +117,7 @@ extractDateReminder reminder =
   in
     case dateRes of
       Ok theDate ->
-        (Date.year theDate, Date.month theDate |> monthToInt, Date.day theDate)
+        (Date.year theDate, Date.month theDate |> Utils.monthToInt, Date.day theDate)
       Err _ ->
         (0, 0, 0)
 
@@ -123,7 +128,7 @@ extractDateEmail email =
   in
     case dateRes of
       Ok theDate ->
-        (Date.year theDate, Date.month theDate |> monthToInt, Date.day theDate)
+        (Date.year theDate, Date.month theDate |> Utils.monthToInt, Date.day theDate)
       Err _ ->
         (0, 0, 0)
 
@@ -149,28 +154,13 @@ extractTitleEmail : Static.Email -> String
 extractTitleEmail email =
   email.title
 
-monthToInt : Date.Month -> Int
-monthToInt month =
-  case month of
-    Date.Jan -> 0
-    Date.Feb -> 1
-    Date.Mar -> 2
-    Date.Apr -> 3
-    Date.May -> 4
-    Date.Jun -> 5
-    Date.Jul -> 6
-    Date.Aug -> 7
-    Date.Sep -> 8
-    Date.Oct -> 9
-    Date.Nov -> 10
-    Date.Dec -> 11
-
 -- UPDATE
 
 type Action
   = ToggleDo
   | TogglePin
   | ToggleTruncate
+  | TimeUpdate Time
   {--}
   | NoOp
   --}
@@ -205,6 +195,22 @@ update action model =
         { model |
             truncated = True
         }
+    TimeUpdate time ->
+      case model.itemtype of
+        Reminder ->
+          let
+            theReminder = extractReminder model
+          in
+            if time > (Utils.dateStringToTime theReminder.deadline) then
+              { model |
+                  deadlineExpired = True
+              }
+            else
+              { model |
+                  deadlineExpired = False
+              }
+        Email ->
+          model
     {--}
     NoOp ->
       model
@@ -261,13 +267,19 @@ viewReminder address model =
     Reminder ->
       let
         reminder = extractReminder model
-        theStyle = genBorderStyle model
+        theStyle =
+          genStyleExpired model
+          `List.append`
+          genBorderStyle model
+          `List.append`
+          genStyleFocusExpired model
       in
         div theStyle
           [ div [] [ text (reminder.body `String.append` "\r\n\r\n")  ]
             , doUndoButton address model
             , pinUnpinButton address model
             , div [] [ text ("\r\n\r\ndate: " `String.append` reminder.created) ]
+            , div [] [ text ("\r\n\r\ndeadline: " `String.append` reminder.deadline)]
             , br [] []
           ]
     Email ->
@@ -280,10 +292,37 @@ genBorderStyle model =
   else
     []
 
+genStyleExpired : Model -> List(Html.Attribute)
+genStyleExpired model =
+  if model.deadlineExpired then
+    [styleExpired]
+  else
+    []
+
+genStyleFocusExpired : Model -> List(Html.Attribute)
+genStyleFocusExpired model =
+  if model.deadlineExpired && model.focus then
+    [styleExpiredFocus]
+  else
+    []
+
 borderStyle : Attribute
 borderStyle =
   style
     [ ("border-left", "thick double rgb(201, 31, 31)")
+    ]
+
+styleExpired : Attribute
+styleExpired =
+  style
+    [ ("background-color", "rgba(201, 31, 31, 0.2)")
+    ]
+
+styleExpiredFocus : Attribute
+styleExpiredFocus =
+  style
+    [ ("border-left", "thick double rgb(201, 31, 31)")
+    , ("background-color", "rgba(201, 31, 31, 0.5)")
     ]
 
 moreLessButton : Signal.Address Action -> Model -> Html

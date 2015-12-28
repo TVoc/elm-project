@@ -15,29 +15,38 @@ Elm.Item.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Static = Elm.Static.make(_elm),
-   $String = Elm.String.make(_elm);
+   $String = Elm.String.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Utils = Elm.Utils.make(_elm);
    var _op = {};
    var truncate = function (text) {
       return A2($String.append,A3($String.slice,0,200,text),"...");
    };
+   var styleExpiredFocus = $Html$Attributes.style(_U.list([{ctor: "_Tuple2"
+                                                           ,_0: "border-left"
+                                                           ,_1: "thick double rgb(201, 31, 31)"}
+                                                          ,{ctor: "_Tuple2"
+                                                           ,_0: "background-color"
+                                                           ,_1: "rgba(201, 31, 31, 0.5)"}]));
+   var styleExpired = $Html$Attributes.style(_U.list([{ctor: "_Tuple2"
+                                                      ,_0: "background-color"
+                                                      ,_1: "rgba(201, 31, 31, 0.2)"}]));
    var borderStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2"
                                                      ,_0: "border-left"
                                                      ,_1: "thick double rgb(201, 31, 31)"}]));
+   var genStyleFocusExpired = function (model) {
+      return model.deadlineExpired && model.focus ? _U.list([styleExpiredFocus]) : _U.list([]);
+   };
+   var genStyleExpired = function (model) {
+      return model.deadlineExpired ? _U.list([styleExpired]) : _U.list([]);
+   };
    var genBorderStyle = function (model) {
       return model.focus ? _U.list([borderStyle]) : _U.list([]);
    };
-   var update = F2(function (action,model) {
-      var _p0 = action;
-      switch (_p0.ctor)
-      {case "ToggleDo": return model.done ? _U.update(model,
-           {done: false}) : _U.update(model,{done: true});
-         case "TogglePin": return model.pinned ? _U.update(model,
-           {pinned: false}) : _U.update(model,{pinned: true});
-         case "ToggleTruncate": return model.truncated ? _U.update(model,
-           {truncated: false}) : _U.update(model,{truncated: true});
-         default: return model;}
-   });
    var NoOp = {ctor: "NoOp"};
+   var TimeUpdate = function (a) {
+      return {ctor: "TimeUpdate",_0: a};
+   };
    var ToggleTruncate = {ctor: "ToggleTruncate"};
    var moreLessButton = F2(function (address,model) {
       return model.truncated ? A2($Html.button,
@@ -62,22 +71,6 @@ Elm.Item.make = function (_elm) {
       _U.list([A2($Html$Events.onClick,address,ToggleDo)]),
       _U.list([$Html.text("Do")]));
    });
-   var monthToInt = function (month) {
-      var _p1 = month;
-      switch (_p1.ctor)
-      {case "Jan": return 0;
-         case "Feb": return 1;
-         case "Mar": return 2;
-         case "Apr": return 3;
-         case "May": return 4;
-         case "Jun": return 5;
-         case "Jul": return 6;
-         case "Aug": return 7;
-         case "Sep": return 8;
-         case "Oct": return 9;
-         case "Nov": return 10;
-         default: return 11;}
-   };
    var extractTitleEmail = function (email) {
       return email.title;
    };
@@ -86,41 +79,41 @@ Elm.Item.make = function (_elm) {
    };
    var extractDateEmail = function (email) {
       var dateRes = $Date.fromString(email.date);
-      var _p2 = dateRes;
-      if (_p2.ctor === "Ok") {
-            var _p3 = _p2._0;
+      var _p0 = dateRes;
+      if (_p0.ctor === "Ok") {
+            var _p1 = _p0._0;
             return {ctor: "_Tuple3"
-                   ,_0: $Date.year(_p3)
-                   ,_1: monthToInt($Date.month(_p3))
-                   ,_2: $Date.day(_p3)};
+                   ,_0: $Date.year(_p1)
+                   ,_1: $Utils.monthToInt($Date.month(_p1))
+                   ,_2: $Date.day(_p1)};
          } else {
             return {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0};
          }
    };
    var extractDateReminder = function (reminder) {
       var dateRes = $Date.fromString(reminder.created);
-      var _p4 = dateRes;
-      if (_p4.ctor === "Ok") {
-            var _p5 = _p4._0;
+      var _p2 = dateRes;
+      if (_p2.ctor === "Ok") {
+            var _p3 = _p2._0;
             return {ctor: "_Tuple3"
-                   ,_0: $Date.year(_p5)
-                   ,_1: monthToInt($Date.month(_p5))
-                   ,_2: $Date.day(_p5)};
+                   ,_0: $Date.year(_p3)
+                   ,_1: $Utils.monthToInt($Date.month(_p3))
+                   ,_2: $Date.day(_p3)};
          } else {
             return {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0};
          }
    };
    var extractEmail = function (model) {
-      var _p6 = model.email;
-      if (_p6.ctor === "Just") {
-            return _p6._0;
+      var _p4 = model.email;
+      if (_p4.ctor === "Just") {
+            return _p4._0;
          } else {
             return {from: "",to: "",title: "",body: "",date: ""};
          }
    };
    var showEmailBodyTrunc = function (model) {
-      var _p7 = model.itemtype;
-      if (_p7.ctor === "Email") {
+      var _p5 = model.itemtype;
+      if (_p5.ctor === "Email") {
             var email = extractEmail(model);
             return model.truncated ? truncate(email.body) : email.body;
          } else {
@@ -128,8 +121,8 @@ Elm.Item.make = function (_elm) {
          }
    };
    var viewEmail = F2(function (address,model) {
-      var _p8 = model.itemtype;
-      if (_p8.ctor === "Email") {
+      var _p6 = model.itemtype;
+      if (_p6.ctor === "Email") {
             var theStyle = genBorderStyle(model);
             var email = extractEmail(model);
             return _U.cmp($String.length(email.body),
@@ -180,16 +173,16 @@ Elm.Item.make = function (_elm) {
          }
    });
    var extractReminder = function (model) {
-      var _p9 = model.reminder;
-      if (_p9.ctor === "Just") {
-            return _p9._0;
+      var _p7 = model.reminder;
+      if (_p7.ctor === "Just") {
+            return _p7._0;
          } else {
-            return {body: "",created: ""};
+            return {body: "",created: "",deadline: ""};
          }
    };
    var extractDate = function (model) {
-      var _p10 = model.itemtype;
-      if (_p10.ctor === "Reminder") {
+      var _p8 = model.itemtype;
+      if (_p8.ctor === "Reminder") {
             var reminder = extractReminder(model);
             return extractDateReminder(reminder);
          } else {
@@ -198,8 +191,8 @@ Elm.Item.make = function (_elm) {
          }
    };
    var extractTitle = function (model) {
-      var _p11 = model.itemtype;
-      if (_p11.ctor === "Reminder") {
+      var _p9 = model.itemtype;
+      if (_p9.ctor === "Reminder") {
             var reminder = extractReminder(model);
             return extractTitleReminder(reminder);
          } else {
@@ -207,10 +200,33 @@ Elm.Item.make = function (_elm) {
             return extractTitleEmail(email);
          }
    };
+   var update = F2(function (action,model) {
+      var _p10 = action;
+      switch (_p10.ctor)
+      {case "ToggleDo": return model.done ? _U.update(model,
+           {done: false}) : _U.update(model,{done: true});
+         case "TogglePin": return model.pinned ? _U.update(model,
+           {pinned: false}) : _U.update(model,{pinned: true});
+         case "ToggleTruncate": return model.truncated ? _U.update(model,
+           {truncated: false}) : _U.update(model,{truncated: true});
+         case "TimeUpdate": var _p11 = model.itemtype;
+           if (_p11.ctor === "Reminder") {
+                 var theReminder = extractReminder(model);
+                 return _U.cmp(_p10._0,
+                 $Utils.dateStringToTime(theReminder.deadline)) > 0 ? _U.update(model,
+                 {deadlineExpired: true}) : _U.update(model,
+                 {deadlineExpired: false});
+              } else {
+                 return model;
+              }
+         default: return model;}
+   });
    var viewReminder = F2(function (address,model) {
       var _p12 = model.itemtype;
       if (_p12.ctor === "Reminder") {
-            var theStyle = genBorderStyle(model);
+            var theStyle = A2($List.append,
+            A2($List.append,genStyleExpired(model),genBorderStyle(model)),
+            genStyleFocusExpired(model));
             var reminder = extractReminder(model);
             return A2($Html.div,
             theStyle,
@@ -226,6 +242,11 @@ Elm.Item.make = function (_elm) {
                     _U.list([$Html.text(A2($String.append,
                     "\r\n\r\ndate: ",
                     reminder.created))]))
+                    ,A2($Html.div,
+                    _U.list([]),
+                    _U.list([$Html.text(A2($String.append,
+                    "\r\n\r\ndeadline: ",
+                    reminder.deadline))]))
                     ,A2($Html.br,_U.list([]),_U.list([]))]));
          } else {
             return A2($Html.div,_U.list([]),_U.list([]));
@@ -239,14 +260,15 @@ Elm.Item.make = function (_elm) {
             return A2(viewReminder,address,model);
          }
    });
-   var Model = F7(function (a,b,c,d,e,f,g) {
+   var Model = F8(function (a,b,c,d,e,f,g,h) {
       return {itemtype: a
              ,email: b
              ,reminder: c
              ,done: d
              ,pinned: e
              ,truncated: f
-             ,focus: g};
+             ,focus: g
+             ,deadlineExpired: h};
    });
    var Reminder = {ctor: "Reminder"};
    var initReminder = function (reminder) {
@@ -256,7 +278,8 @@ Elm.Item.make = function (_elm) {
              ,done: false
              ,pinned: false
              ,truncated: true
-             ,focus: false};
+             ,focus: false
+             ,deadlineExpired: false};
    };
    var Email = {ctor: "Email"};
    var initEmail = function (email) {
@@ -266,7 +289,8 @@ Elm.Item.make = function (_elm) {
              ,done: false
              ,pinned: false
              ,truncated: true
-             ,focus: false};
+             ,focus: false
+             ,deadlineExpired: false};
    };
    return _elm.Item.values = {_op: _op
                              ,initReminder: initReminder
@@ -279,5 +303,6 @@ Elm.Item.make = function (_elm) {
                              ,ToggleDo: ToggleDo
                              ,TogglePin: TogglePin
                              ,ToggleTruncate: ToggleTruncate
+                             ,TimeUpdate: TimeUpdate
                              ,NoOp: NoOp};
 };

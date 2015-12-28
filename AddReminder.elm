@@ -10,18 +10,21 @@ import Html.Events exposing (onClick)
 type alias Model =
   { body : String
   , created : String
+  , deadline : String
   , hide : Bool
   }
 
 type alias Output =
   { body : String
   , created : String
+  , deadline : String
   }
 
 init : Bool -> Model
 init hideIt =
   { body = ""
   , created = "2015-01-01"
+  , deadline = "2015-01-02"
   , hide = hideIt
   }
 
@@ -48,6 +51,7 @@ reminderActions =
 type Action
   = ChangeBody String
   | ChangeCreated String
+  | ChangeDeadline String
   | AddReminder Output Bool
   | ToggleHide
   | NoOp
@@ -62,6 +66,10 @@ update action model =
     ChangeCreated newCreated ->
       { model |
           created = newCreated
+      }
+    ChangeDeadline newDeadline ->
+      { model |
+          deadline = newDeadline
       }
     AddReminder theOutput hideIt ->
       init hideIt
@@ -79,6 +87,7 @@ takeOutput : Model -> Output
 takeOutput model =
   { body = model.body
   , created = model.created
+  , deadline = model.deadline
   }
 
 -- VIEW
@@ -92,8 +101,9 @@ view address model =
       ]
   else
     div []
-      [ div [] [ fieldInput "text" address ChangeBody model.body
-               , fieldInput "date" address ChangeCreated model.created
+      [ div [] [ div [] [text "Reminder: ", fieldInput "text" address ChangeBody model.body]
+               , div [] [text "Created: ", fieldInput "date" address ChangeCreated model.created]
+               , div [] [text "Deadline: ", fieldInput "date" address ChangeDeadline model.deadline]
                , submitButton address model
                , hideButton address model
                ]

@@ -27,10 +27,13 @@ Elm.Static.make = function (_elm) {
                ,body: "This is the body of an email with less than 200 characters."
                ,date: "2015-09-30"};
    var reminders = _U.list([{body: "Take out the trash"
-                            ,created: "2016-09-30"}
-                           ,{body: "Groceries",created: "2015-09-25"}]);
-   var Reminder = F2(function (a,b) {
-      return {body: a,created: b};
+                            ,created: "2016-09-30"
+                            ,deadline: "2016-09-30"}
+                           ,{body: "Groceries"
+                            ,created: "2015-09-25"
+                            ,deadline: "2015-09-25"}]);
+   var Reminder = F3(function (a,b,c) {
+      return {body: a,created: b,deadline: c};
    });
    var Email = F5(function (a,b,c,d,e) {
       return {from: a,to: b,title: c,body: d,date: e};

@@ -1,0 +1,76 @@
+Elm.Utils = Elm.Utils || {};
+Elm.Utils.make = function (_elm) {
+   "use strict";
+   _elm.Utils = _elm.Utils || {};
+   if (_elm.Utils.values) return _elm.Utils.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Date$Format = Elm.Date.Format.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var reverseComparison = function (comp) {
+      var _p0 = comp;
+      switch (_p0.ctor)
+      {case "LT": return $Basics.GT;
+         case "GT": return $Basics.LT;
+         default: return $Basics.EQ;}
+   };
+   var compareDates = F2(function (_p2,_p1) {
+      var _p3 = _p2;
+      var _p10 = _p3._0;
+      var _p9 = _p3._1;
+      var _p8 = _p3._2;
+      var _p4 = _p1;
+      var _p7 = _p4._0;
+      var _p6 = _p4._1;
+      var _p5 = _p4._2;
+      return _U.cmp(_p10,_p7) < 0 ? $Basics.LT : _U.cmp(_p10,
+      _p7) > 0 ? $Basics.GT : _U.cmp(_p9,
+      _p6) < 0 ? $Basics.LT : _U.cmp(_p9,
+      _p6) > 0 ? $Basics.GT : _U.cmp(_p8,
+      _p5) < 0 ? $Basics.LT : _U.cmp(_p8,
+      _p5) > 0 ? $Basics.GT : $Basics.EQ;
+   });
+   var monthToInt = function (month) {
+      var _p11 = month;
+      switch (_p11.ctor)
+      {case "Jan": return 0;
+         case "Feb": return 1;
+         case "Mar": return 2;
+         case "Apr": return 3;
+         case "May": return 4;
+         case "Jun": return 5;
+         case "Jul": return 6;
+         case "Aug": return 7;
+         case "Sep": return 8;
+         case "Oct": return 9;
+         case "Nov": return 10;
+         default: return 11;}
+   };
+   var dateStringToTime = function (dateString) {
+      var converted = $Date.fromString(dateString);
+      var _p12 = converted;
+      if (_p12.ctor === "Ok") {
+            return $Date.toTime(_p12._0);
+         } else {
+            return -1;
+         }
+   };
+   var timeToDateString = function (time) {
+      return $Basics.toString(A2($Date$Format.format,
+      "%Y-%m-%d",
+      $Date.fromTime(time)));
+   };
+   return _elm.Utils.values = {_op: _op
+                              ,timeToDateString: timeToDateString
+                              ,dateStringToTime: dateStringToTime
+                              ,monthToInt: monthToInt
+                              ,compareDates: compareDates
+                              ,reverseComparison: reverseComparison};
+};

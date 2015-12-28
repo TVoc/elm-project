@@ -6,6 +6,8 @@ import Static
 import Item
 import Html.Attributes exposing (..)
 import AddReminder
+import Utils
+import Time exposing (Time)
 
 {--}
 -- MAIN
@@ -148,6 +150,7 @@ type Action
   | PinCurrent
   | DoneCurrent
   | ToggleHideDone
+  | TimeUpdate Time
   --}
 
 update : Action -> Model -> Model
@@ -281,6 +284,18 @@ update action model =
           }
       in
         fixFocus newModel
+    TimeUpdate time ->
+      let
+        theItems = List.map (\(id, bool, itemModel) -> (id, bool, (Item.update (Item.TimeUpdate time) itemModel))) model.items
+        newModel =
+          { model |
+              items = theItems
+          }
+      in
+        if newModel.altSort then
+          altSort newModel
+        else
+          mainSort newModel
     NoOp ->
       model
     --}
@@ -390,7 +405,7 @@ mainComparison (_, _, one) (_, _, two) =
       tupleOne = Item.extractDate(one)
       tupleTwo = Item.extractDate(two)
     in
-      compareDates tupleOne tupleTwo
+      Utils.compareDates tupleOne tupleTwo
 
 altComparison : (Int, Bool, Item.Model) -> (Int, Bool, Item.Model) -> Order
 altComparison (_, _, one) (_, _, two) =
@@ -403,31 +418,7 @@ altComparison (_, _, one) (_, _, two) =
       tupleOne = Item.extractDate(one)
       tupleTwo = Item.extractDate(two)
     in
-      reverseComparison (compareDates tupleOne tupleTwo)
-
-compareDates : (Int,Int,Int) -> (Int,Int,Int) -> Order
-compareDates (yearOne, monthOne, dayOne) (yearTwo, monthTwo, dayTwo) =
-  if (yearOne < yearTwo) then
-    LT
-  else if (yearOne > yearTwo) then
-    GT
-  else if (monthOne < monthTwo) then
-    LT
-  else if (monthOne > monthTwo) then
-    GT
-  else if (dayOne < dayTwo) then
-    LT
-  else if (dayOne > dayTwo) then
-    GT
-  else
-    EQ
-
-reverseComparison : Order -> Order
-reverseComparison comp =
-  case comp of
-    LT -> GT
-    GT -> LT
-    EQ -> EQ
+      Utils.reverseComparison (Utils.compareDates tupleOne tupleTwo)
 
 {--}
 currentItem : Model -> Item.Model
@@ -440,7 +431,7 @@ currentItem model =
   in
     case theItem of
       Nothing ->
-        Item.initReminder { body = "", created = "" }
+        Item.initReminder { body = "", created = "", deadline = "" }
       Just (_, _, item) ->
         item
 --}

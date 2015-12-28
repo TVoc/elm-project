@@ -13,12 +13,13 @@ type alias Email =
 type alias Reminder =
   { body: String
   , created: String
+  , deadline: String
   }
 
 reminders : List Reminder
 reminders =
-  [ { body = "Take out the trash", created = "2016-09-30" }
-  , { body = "Groceries", created = "2015-09-25" }
+  [ { body = "Take out the trash", created = "2016-09-30", deadline = "2016-09-30" }
+  , { body = "Groceries", created = "2015-09-25", deadline = "2015-09-25" }
   ]
 
 email : Email

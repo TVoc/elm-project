@@ -14,7 +14,9 @@ Elm.ItemList.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Static = Elm.Static.make(_elm);
+   $Static = Elm.Static.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Utils = Elm.Utils.make(_elm);
    var _op = {};
    var takeDone$ = function (items) {
       takeDone$: while (true) {
@@ -115,68 +117,49 @@ Elm.ItemList.make = function (_elm) {
       var theItem = $List.head(inList);
       var _p16 = theItem;
       if (_p16.ctor === "Nothing") {
-            return $Item.initReminder({body: "",created: ""});
+            return $Item.initReminder({body: ""
+                                      ,created: ""
+                                      ,deadline: ""});
          } else {
             return _p16._0._2;
          }
    };
-   var reverseComparison = function (comp) {
-      var _p17 = comp;
-      switch (_p17.ctor)
-      {case "LT": return $Basics.GT;
-         case "GT": return $Basics.LT;
-         default: return $Basics.EQ;}
-   };
-   var compareDates = F2(function (_p19,_p18) {
-      var _p20 = _p19;
-      var _p27 = _p20._0;
-      var _p26 = _p20._1;
-      var _p25 = _p20._2;
-      var _p21 = _p18;
-      var _p24 = _p21._0;
-      var _p23 = _p21._1;
-      var _p22 = _p21._2;
-      return _U.cmp(_p27,_p24) < 0 ? $Basics.LT : _U.cmp(_p27,
-      _p24) > 0 ? $Basics.GT : _U.cmp(_p26,
-      _p23) < 0 ? $Basics.LT : _U.cmp(_p26,
-      _p23) > 0 ? $Basics.GT : _U.cmp(_p25,
-      _p22) < 0 ? $Basics.LT : _U.cmp(_p25,
-      _p22) > 0 ? $Basics.GT : $Basics.EQ;
-   });
-   var altComparison = F2(function (_p29,_p28) {
-      var _p30 = _p29;
-      var _p33 = _p30._2;
-      var _p31 = _p28;
-      var _p32 = _p31._2;
-      if (_p33.done && $Basics.not(_p32.done)) return $Basics.GT;
-      else if ($Basics.not(_p33.done) && _p32.done) return $Basics.LT;
+   var altComparison = F2(function (_p18,_p17) {
+      var _p19 = _p18;
+      var _p22 = _p19._2;
+      var _p20 = _p17;
+      var _p21 = _p20._2;
+      if (_p22.done && $Basics.not(_p21.done)) return $Basics.GT;
+      else if ($Basics.not(_p22.done) && _p21.done) return $Basics.LT;
          else {
-               var tupleTwo = $Item.extractDate(_p32);
-               var tupleOne = $Item.extractDate(_p33);
-               return reverseComparison(A2(compareDates,tupleOne,tupleTwo));
+               var tupleTwo = $Item.extractDate(_p21);
+               var tupleOne = $Item.extractDate(_p22);
+               return $Utils.reverseComparison(A2($Utils.compareDates,
+               tupleOne,
+               tupleTwo));
             }
    });
-   var mainComparison = F2(function (_p35,_p34) {
-      var _p36 = _p35;
-      var _p39 = _p36._2;
-      var _p37 = _p34;
-      var _p38 = _p37._2;
-      if (_p39.done && $Basics.not(_p38.done)) return $Basics.GT;
-      else if ($Basics.not(_p39.done) && _p38.done) return $Basics.LT;
-         else if (_p39.pinned && $Basics.not(_p38.pinned))
+   var mainComparison = F2(function (_p24,_p23) {
+      var _p25 = _p24;
+      var _p28 = _p25._2;
+      var _p26 = _p23;
+      var _p27 = _p26._2;
+      if (_p28.done && $Basics.not(_p27.done)) return $Basics.GT;
+      else if ($Basics.not(_p28.done) && _p27.done) return $Basics.LT;
+         else if (_p28.pinned && $Basics.not(_p27.pinned))
             return $Basics.LT;
-            else if ($Basics.not(_p39.pinned) && _p38.pinned)
+            else if ($Basics.not(_p28.pinned) && _p27.pinned)
                return $Basics.GT; else {
-                     var tupleTwo = $Item.extractDate(_p38);
-                     var tupleOne = $Item.extractDate(_p39);
-                     return A2(compareDates,tupleOne,tupleTwo);
+                     var tupleTwo = $Item.extractDate(_p27);
+                     var tupleOne = $Item.extractDate(_p28);
+                     return A2($Utils.compareDates,tupleOne,tupleTwo);
                   }
    });
    var focusListIndex = function (model) {
       var theItems = A2($List.map,
-      function (_p40) {
-         var _p41 = _p40;
-         return _p41._2;
+      function (_p29) {
+         var _p30 = _p29;
+         return _p30._2;
       },
       model.items);
       var filterDones = model.hideDone ? A2($List.filter,
@@ -189,28 +172,28 @@ Elm.ItemList.make = function (_elm) {
    var fixFocus$ = F3(function (acc,focusID,itemList) {
       var rest = $List.tail(itemList);
       var first = $List.head(itemList);
-      var _p42 = first;
-      if (_p42.ctor === "Nothing") {
+      var _p31 = first;
+      if (_p31.ctor === "Nothing") {
             return _U.list([]);
          } else {
-            var _p45 = _p42._0._2;
-            var _p44 = _p42._0._0;
-            var fixedModel = _U.eq(focusID,acc) ? _U.update(_p45,
-            {focus: true}) : _U.update(_p45,{focus: false});
-            var fixedItem = _U.eq(focusID,_p44) ? {ctor: "_Tuple3"
-                                                  ,_0: _p44
+            var _p34 = _p31._0._2;
+            var _p33 = _p31._0._0;
+            var fixedModel = _U.eq(focusID,acc) ? _U.update(_p34,
+            {focus: true}) : _U.update(_p34,{focus: false});
+            var fixedItem = _U.eq(focusID,_p33) ? {ctor: "_Tuple3"
+                                                  ,_0: _p33
                                                   ,_1: true
                                                   ,_2: fixedModel} : {ctor: "_Tuple3"
-                                                                     ,_0: _p44
+                                                                     ,_0: _p33
                                                                      ,_1: false
                                                                      ,_2: fixedModel};
-            var _p43 = rest;
-            if (_p43.ctor === "Nothing") {
+            var _p32 = rest;
+            if (_p32.ctor === "Nothing") {
                   return _U.list([fixedItem]);
                } else {
                   return A2($List._op["::"],
                   fixedItem,
-                  A3(fixFocus$,acc + 1,focusID,_p43._0));
+                  A3(fixFocus$,acc + 1,focusID,_p32._0));
                }
          }
    });
@@ -245,6 +228,9 @@ Elm.ItemList.make = function (_elm) {
       var newModel = _U.update(model,{items: newItems});
       return newModel.altSort ? altSort(newModel) : mainSort(newModel);
    });
+   var TimeUpdate = function (a) {
+      return {ctor: "TimeUpdate",_0: a};
+   };
    var ToggleHideDone = {ctor: "ToggleHideDone"};
    var DoneCurrent = {ctor: "DoneCurrent"};
    var PinCurrent = {ctor: "PinCurrent"};
@@ -260,19 +246,19 @@ Elm.ItemList.make = function (_elm) {
    var Modify = F2(function (a,b) {
       return {ctor: "Modify",_0: a,_1: b};
    });
-   var viewItem = F2(function (address,_p46) {
-      var _p47 = _p46;
+   var viewItem = F2(function (address,_p35) {
+      var _p36 = _p35;
       return A2($Item.view,
-      A2($Signal.forwardTo,address,Modify(_p47._0)),
-      _p47._2);
+      A2($Signal.forwardTo,address,Modify(_p36._0)),
+      _p36._2);
    });
-   var genDiv = F2(function (address,_p48) {
-      var _p49 = _p48;
+   var genDiv = F2(function (address,_p37) {
+      var _p38 = _p37;
       return A2($Html.div,
       _U.list([]),
       _U.list([A2(viewItem,
       address,
-      {ctor: "_Tuple3",_0: _p49._0,_1: _p49._1,_2: _p49._2})]));
+      {ctor: "_Tuple3",_0: _p38._0,_1: _p38._1,_2: _p38._2})]));
    });
    var view = F2(function (address,model) {
       var addReminderView = A2($AddReminder.view,
@@ -316,17 +302,17 @@ Elm.ItemList.make = function (_elm) {
       return {ctor: "AddReminder",_0: a};
    };
    var update = F2(function (action,model) {
-      var _p50 = action;
-      switch (_p50.ctor)
+      var _p39 = action;
+      switch (_p39.ctor)
       {case "AddReminder":
-         var reminderModel = $Item.initReminder(_p50._0);
+         var reminderModel = $Item.initReminder(_p39._0);
            var newModel = _U.update(model,
            {items: A2($List._op["::"],
            {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: reminderModel},
            model.items)
            ,nextID: model.nextID + 1});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "AddEmail": var emailModel = $Item.initEmail(_p50._0);
+         case "AddEmail": var emailModel = $Item.initEmail(_p39._0);
            var newModel = _U.update(model,
            {items: A2($List._op["::"],
            {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: emailModel},
@@ -343,33 +329,33 @@ Elm.ItemList.make = function (_elm) {
            0) ? 0 : focusListIndex(model) - 1 : model.focusOn - 1;
            var newModel = _U.update(model,{focusOn: nextFocus});
            return fixFocus(newModel);
-         case "Modify": var updateModel = function (_p51) {
-              var _p52 = _p51;
-              var _p55 = _p52._0;
-              var _p54 = _p52._2;
-              var _p53 = _p52._1;
-              return _U.eq(_p55,_p50._0) ? {ctor: "_Tuple3"
-                                           ,_0: _p55
-                                           ,_1: _p53
-                                           ,_2: A2($Item.update,_p50._1,_p54)} : {ctor: "_Tuple3"
-                                                                                 ,_0: _p55
-                                                                                 ,_1: _p53
-                                                                                 ,_2: _p54};
+         case "Modify": var updateModel = function (_p40) {
+              var _p41 = _p40;
+              var _p44 = _p41._0;
+              var _p43 = _p41._2;
+              var _p42 = _p41._1;
+              return _U.eq(_p44,_p39._0) ? {ctor: "_Tuple3"
+                                           ,_0: _p44
+                                           ,_1: _p42
+                                           ,_2: A2($Item.update,_p39._1,_p43)} : {ctor: "_Tuple3"
+                                                                                 ,_0: _p44
+                                                                                 ,_1: _p42
+                                                                                 ,_2: _p43};
            };
            var newModel = _U.update(model,
            {items: A2($List.map,updateModel,model.items)});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "ModifyAddReminder": var _p57 = _p50._0;
+         case "ModifyAddReminder": var _p46 = _p39._0;
            var updatedModel = function () {
-              var _p56 = _p57;
-              if (_p56.ctor === "AddReminder") {
-                    return A2(update,AddReminder(_p56._0),model);
+              var _p45 = _p46;
+              if (_p45.ctor === "AddReminder") {
+                    return A2(update,AddReminder(_p45._0),model);
                  } else {
                     return model;
                  }
            }();
            var updatedAddReminder = A2($AddReminder.update,
-           _p57,
+           _p46,
            model.addReminder);
            return _U.update(updatedModel,
            {addReminder: updatedAddReminder});
@@ -393,6 +379,17 @@ Elm.ItemList.make = function (_elm) {
          var notHideDone = $Basics.not(model.hideDone);
            var newModel = _U.update(model,{hideDone: notHideDone});
            return fixFocus(newModel);
+         case "TimeUpdate": var theItems = A2($List.map,
+           function (_p47) {
+              var _p48 = _p47;
+              return {ctor: "_Tuple3"
+                     ,_0: _p48._0
+                     ,_1: _p48._1
+                     ,_2: A2($Item.update,$Item.TimeUpdate(_p39._0),_p48._2)};
+           },
+           model.items);
+           var newModel = _U.update(model,{items: theItems});
+           return newModel.altSort ? altSort(newModel) : mainSort(newModel);
          default: return model;}
    });
    var initEmpty = {items: _U.list([])
@@ -441,5 +438,6 @@ Elm.ItemList.make = function (_elm) {
                                  ,TruncateCurrent: TruncateCurrent
                                  ,PinCurrent: PinCurrent
                                  ,DoneCurrent: DoneCurrent
-                                 ,ToggleHideDone: ToggleHideDone};
+                                 ,ToggleHideDone: ToggleHideDone
+                                 ,TimeUpdate: TimeUpdate};
 };
