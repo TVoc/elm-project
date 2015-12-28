@@ -152,11 +152,9 @@ update action model =
       let
         reminderModel = Item.initReminder reminder
         newModel =
-          { items = (model.nextID, False, reminderModel) :: model.items
-          , nextID = model.nextID + 1
-          , focusOn = model.focusOn
-          , addReminder = model.addReminder
-          , altSort = model.altSort
+          { model |
+              items = (model.nextID, False, reminderModel) :: model.items
+          ,   nextID = model.nextID + 1
           }
       in
         if newModel.altSort then
@@ -167,11 +165,9 @@ update action model =
       let
         emailModel = Item.initEmail email
         newModel =
-          { items = (model.nextID, False, emailModel) :: model.items
-          , nextID = model.nextID + 1
-          , focusOn = model.focusOn
-          , addReminder = model.addReminder
-          , altSort = model.altSort
+          { model |
+              items = (model.nextID, False, emailModel) :: model.items
+          ,   nextID = model.nextID + 1
           }
       in
         if newModel.altSort then
@@ -182,11 +178,8 @@ update action model =
       let
         nextFocus = (model.focusOn + 1) % List.length model.items
         newModel =
-          { items = model.items
-          , nextID = model.nextID
-          , focusOn = nextFocus
-          , addReminder = model.addReminder
-          , altSort = model.altSort
+          { model |
+              focusOn = nextFocus
           }
       in
         fixFocus newModel
@@ -201,11 +194,8 @@ update action model =
           else
             model.focusOn - 1
         newModel =
-          { items = model.items
-          , nextID = model.nextID
-          , focusOn = nextFocus
-          , addReminder = model.addReminder
-          , altSort = model.altSort
+          { model |
+              focusOn = nextFocus
           }
       in
         fixFocus newModel
@@ -217,11 +207,8 @@ update action model =
           else
             (modelID, bool, itemModel)
         newModel =
-          { items = List.map updateModel model.items
-          , nextID = model.nextID
-          , focusOn = model.focusOn
-          , addReminder = model.addReminder
-          , altSort = model.altSort
+          { model |
+              items = List.map updateModel model.items
           }
       in
         if newModel.altSort then
