@@ -75,8 +75,9 @@ main =
 
 itemListState : Signal ItemList.Model
 itemListState =
-  Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [addReminderToListAction, ItemList.actions, KeyboardInput.keyboardInput])
+  Signal.foldp ItemList.update ItemList.init (Signal.merge ItemList.actions KeyboardInput.keyboardInput)
 
+{--
 addReminderToListAction : Signal ItemList.Action
 addReminderToListAction =
   let
@@ -94,6 +95,7 @@ addReminderToListAction =
           ItemList.NoOp
   in
   Signal.map extractReminder  <| Signal.filter filterAdd AddReminder.NoOp AddReminder.reminderActions
+--}
 
 {--
 view : Html

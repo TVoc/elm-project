@@ -393,7 +393,7 @@ Elm.ItemList.make = function (_elm) {
    var initEmpty = {items: _U.list([])
                    ,nextID: 0
                    ,focusOn: 0
-                   ,addReminder: $AddReminder.init
+                   ,addReminder: $AddReminder.init(false)
                    ,altSort: false
                    ,hideDone: false};
    var init = function () {

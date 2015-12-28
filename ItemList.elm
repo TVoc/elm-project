@@ -57,7 +57,7 @@ initEmpty =
   { items = []
   , nextID = 0
   , focusOn = 0
-  , addReminder = AddReminder.init
+  , addReminder = AddReminder.init False
   , altSort = False
   , hideDone = False
   }
@@ -224,7 +224,7 @@ update action model =
         updatedAddReminder = AddReminder.update addReminderAction model.addReminder
         updatedModel =
           case addReminderAction of
-            AddReminder.AddReminder reminder ->
+            AddReminder.AddReminder reminder hideIt ->
               update (AddReminder reminder) model
             _ ->
               model

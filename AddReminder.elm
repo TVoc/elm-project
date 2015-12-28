@@ -1,4 +1,4 @@
-module AddReminder(Model, Action(..), init, view, reminderActions, reminderAddress, state, update) where
+module AddReminder(Model, Action(..), init, view, update) where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -10,14 +10,22 @@ import Html.Events exposing (onClick)
 type alias Model =
   { body : String
   , created : String
+  , hide : Bool
   }
 
-init : Model
-init =
+type alias Output =
+  { body : String
+  , created : String
+  }
+
+init : Bool -> Model
+init hideIt =
   { body = ""
   , created = "2015-01-01"
+  , hide = hideIt
   }
 
+{--
 state : Signal Model
 state =
   Signal.foldp update init reminderActions
@@ -33,13 +41,15 @@ reminderAddress =
 reminderActions : Signal Action
 reminderActions =
   reminderMailBox.signal
+--}
 
 -- UPDATE
 
 type Action
   = ChangeBody String
   | ChangeCreated String
-  | AddReminder Model
+  | AddReminder Output Bool
+  | ToggleHide
   | NoOp
 
 update : Action -> Model -> Model
@@ -53,22 +63,42 @@ update action model =
       { model |
           created = newCreated
       }
-    AddReminder theModel ->
-      init
+    AddReminder theOutput hideIt ->
+      init hideIt
+    ToggleHide ->
+      let
+        notHide = not model.hide
+      in
+        { model |
+            hide = notHide
+        }
     NoOp ->
       model
+
+takeOutput : Model -> Output
+takeOutput model =
+  { body = model.body
+  , created = model.created
+  }
 
 -- VIEW
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-  div []
-    [ div [] [ fieldInput "text" address ChangeBody model.body
-             , fieldInput "date" address ChangeCreated model.created
-             , submitButton address model
-             ]
+  if model.hide then
+    div []
+      [ div [] [ hideButton address model
+               ]
+      ]
+  else
+    div []
+      [ div [] [ fieldInput "text" address ChangeBody model.body
+               , fieldInput "date" address ChangeCreated model.created
+               , submitButton address model
+               , hideButton address model
+               ]
 
-    ]
+      ]
 
 fieldInput : String -> Signal.Address Action -> (String -> Action) -> String -> Html
 fieldInput fieldType address toAction content =
@@ -84,4 +114,11 @@ fieldInput fieldType address toAction content =
 
 submitButton : Signal.Address Action -> Model -> Html
 submitButton address model =
-  button [ onClick address (AddReminder model)] [ text "Add" ]
+  button [ onClick address (AddReminder (takeOutput model) model.hide)] [ text "Add" ]
+
+hideButton : Signal.Address Action -> Model -> Html
+hideButton address model =
+  if model.hide then
+    button [ onClick address ToggleHide] [ text "Unhide Add Reminder" ]
+  else
+    button [ onClick address ToggleHide] [ text "Hide" ]

@@ -32,13 +32,26 @@ Elm.AddReminder.make = function (_elm) {
                       })]),
               _U.list([]))]));
    });
-   var NoOp = {ctor: "NoOp"};
-   var AddReminder = function (a) {
-      return {ctor: "AddReminder",_0: a};
+   var takeOutput = function (model) {
+      return {body: model.body,created: model.created};
    };
+   var NoOp = {ctor: "NoOp"};
+   var ToggleHide = {ctor: "ToggleHide"};
+   var hideButton = F2(function (address,model) {
+      return model.hide ? A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
+      _U.list([$Html.text("Unhide Add Reminder")])) : A2($Html.button,
+      _U.list([A2($Html$Events.onClick,address,ToggleHide)]),
+      _U.list([$Html.text("Hide")]));
+   });
+   var AddReminder = F2(function (a,b) {
+      return {ctor: "AddReminder",_0: a,_1: b};
+   });
    var submitButton = F2(function (address,model) {
       return A2($Html.button,
-      _U.list([A2($Html$Events.onClick,address,AddReminder(model))]),
+      _U.list([A2($Html$Events.onClick,
+      address,
+      A2(AddReminder,takeOutput(model),model.hide))]),
       _U.list([$Html.text("Add")]));
    });
    var ChangeCreated = function (a) {
@@ -48,40 +61,46 @@ Elm.AddReminder.make = function (_elm) {
       return {ctor: "ChangeBody",_0: a};
    };
    var view = F2(function (address,model) {
-      return A2($Html.div,
+      return model.hide ? A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([]),
+      _U.list([A2(hideButton,address,model)]))])) : A2($Html.div,
       _U.list([]),
       _U.list([A2($Html.div,
       _U.list([]),
       _U.list([A4(fieldInput,"text",address,ChangeBody,model.body)
               ,A4(fieldInput,"date",address,ChangeCreated,model.created)
-              ,A2(submitButton,address,model)]))]));
+              ,A2(submitButton,address,model)
+              ,A2(hideButton,address,model)]))]));
    });
-   var reminderMailBox = $Signal.mailbox(NoOp);
-   var reminderAddress = reminderMailBox.address;
-   var reminderActions = reminderMailBox.signal;
-   var init = {body: "",created: "2015-01-01"};
+   var init = function (hideIt) {
+      return {body: "",created: "2015-01-01",hide: hideIt};
+   };
    var update = F2(function (action,model) {
       var _p0 = action;
       switch (_p0.ctor)
       {case "ChangeBody": return _U.update(model,{body: _p0._0});
          case "ChangeCreated": return _U.update(model,{created: _p0._0});
-         case "AddReminder": return init;
+         case "AddReminder": return init(_p0._1);
+         case "ToggleHide": var notHide = $Basics.not(model.hide);
+           return _U.update(model,{hide: notHide});
          default: return model;}
    });
-   var state = A3($Signal.foldp,update,init,reminderActions);
-   var Model = F2(function (a,b) {
+   var Output = F2(function (a,b) {
       return {body: a,created: b};
+   });
+   var Model = F3(function (a,b,c) {
+      return {body: a,created: b,hide: c};
    });
    return _elm.AddReminder.values = {_op: _op
                                     ,init: init
                                     ,view: view
-                                    ,reminderActions: reminderActions
-                                    ,reminderAddress: reminderAddress
-                                    ,state: state
                                     ,update: update
                                     ,Model: Model
                                     ,ChangeBody: ChangeBody
                                     ,ChangeCreated: ChangeCreated
                                     ,AddReminder: AddReminder
+                                    ,ToggleHide: ToggleHide
                                     ,NoOp: NoOp};
 };
