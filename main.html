@@ -11883,6 +11883,7 @@ Elm.Utils.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
    $Time = Elm.Time.make(_elm);
    var _op = {};
    var reverseComparison = function (comp) {
@@ -11939,9 +11940,16 @@ Elm.Utils.make = function (_elm) {
       $Date.fromTime(time)));
    };
    var timeToDateString = function (time) {
-      return $Basics.toString(A2($Date$Format.format,
+      var baseString = $Basics.toString(A2($Date$Format.format,
       "%Y-%m-%d",
       $Date.fromTime(time)));
+      var fromRight = A2($String.right,
+      $String.length(baseString) - 1,
+      baseString);
+      var fromLeft = A2($String.left,
+      $String.length(fromRight) - 1,
+      fromRight);
+      return fromLeft;
    };
    return _elm.Utils.values = {_op: _op
                               ,timeToDateString: timeToDateString
@@ -12065,7 +12073,7 @@ Elm.AddReminder.make = function (_elm) {
          case "ToggleHide": var notHide = $Basics.not(model.hide);
            return _U.update(model,{hide: notHide});
          case "TimeUpdate": return model.defaultDate ? _U.update(model,
-           {created: $Utils.timeToDateStringReverse(_p0._0)}) : model;
+           {created: $Utils.timeToDateString(_p0._0)}) : model;
          default: return model;}
    });
    var Output = F3(function (a,b,c) {

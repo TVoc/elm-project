@@ -13,28 +13,22 @@ Elm.Main.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm),
-   $TimeKeeper = Elm.TimeKeeper.make(_elm);
+   $Time = Elm.Time.make(_elm);
    var _op = {};
    var watchSignal = function (caption) {
       return $Signal.map($Debug.watch(caption));
    };
-   var timeKeeperState = A3($Signal.foldp,
-   $TimeKeeper.update,
-   $TimeKeeper.init,
-   A2($Signal.map,
-   function (x) {
-      return $TimeKeeper.AddMillisecond;
-   },
-   $Time.every($Time.millisecond)));
+   var toItemListAction = function (time) {
+      return $ItemList.TimeUpdate(time);
+   };
    var itemListState = A3($Signal.foldp,
    $ItemList.update,
    $ItemList.init,
    $Signal.mergeMany(_U.list([$ItemList.actions
                              ,$KeyboardInput.keyboardInput
                              ,A2($Signal.map,
-                             $TimeKeeper.toItemListAction,
-                             timeKeeperState)])));
+                             toItemListAction,
+                             $Time.every($Time.millisecond))])));
    var main = function () {
       var viewFeed = A2($Signal.map,
       $ItemList.view($ItemList.actionAddress),
@@ -44,6 +38,6 @@ Elm.Main.make = function (_elm) {
    return _elm.Main.values = {_op: _op
                              ,main: main
                              ,itemListState: itemListState
-                             ,timeKeeperState: timeKeeperState
+                             ,toItemListAction: toItemListAction
                              ,watchSignal: watchSignal};
 };

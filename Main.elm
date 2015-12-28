@@ -5,9 +5,8 @@ import ItemList
 import Signal
 import KeyboardInput
 import AddReminder
-import TimeKeeper
 import Graphics.Element exposing (show)
-import Time
+import Time exposing (Time)
 import Utils
 
 -- Name:
@@ -78,18 +77,23 @@ main =
 --}
 
 {--
-
 main =
-  show (Utils.dateStringToTime "2015-12-28")
-  --}
+  Signal.map show (Time.every Time.millisecond)
+--}
 
 itemListState : Signal ItemList.Model
 itemListState =
-  Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [ItemList.actions, KeyboardInput.keyboardInput, Signal.map TimeKeeper.toItemListAction timeKeeperState])
+  Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [ItemList.actions, KeyboardInput.keyboardInput, Signal.map toItemListAction (Time.every Time.millisecond)])
 
+{--
 timeKeeperState : Signal TimeKeeper.Model
 timeKeeperState =
   Signal.foldp TimeKeeper.update TimeKeeper.init (Signal.map (\x -> TimeKeeper.AddMillisecond) (Time.every Time.millisecond))
+--}
+
+toItemListAction : Time -> ItemList.Action
+toItemListAction time =
+  ItemList.TimeUpdate time
 
 watchSignal : String -> Signal a -> Signal a
 watchSignal caption = Signal.map (Debug.watch caption)

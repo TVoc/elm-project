@@ -13305,89 +13305,6 @@ Elm.KeyboardInput.make = function (_elm) {
                                       ,keyboardInput: keyboardInput
                                       ,watchSignal: watchSignal};
 };
-Elm.Native.CurrentTime = {};
-
-Elm.Native.CurrentTime.make = function(localRuntime) {
-
-  localRuntime.Native = localRuntime.Native || {};
-
-
-  localRuntime.Native.CurrentTime = localRuntime.Native.CurrentTime || {};
-
-  if (localRuntime.Native.CurrentTime.values) {
-    return localRuntime.Native.CurrentTime.values;
-  }
-
-  //var Result = Elm.Result.make(localRuntime);
-
-  return localRuntime.Native.CurrentTime.values = {
-    loadTime: (new window.Date).getTime()
-  };
-
-};
-Elm.TimeKeeper = Elm.TimeKeeper || {};
-Elm.TimeKeeper.make = function (_elm) {
-   "use strict";
-   _elm.TimeKeeper = _elm.TimeKeeper || {};
-   if (_elm.TimeKeeper.values) return _elm.TimeKeeper.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Date = Elm.Date.make(_elm),
-   $Date$Format = Elm.Date.Format.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $ItemList = Elm.ItemList.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Native$CurrentTime = Elm.Native.CurrentTime.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var _op = {};
-   var toItemListAction = function (model) {
-      return $ItemList.TimeUpdate(model.currentTime);
-   };
-   var update = F2(function (action,model) {
-      var _p0 = action;
-      if (_p0.ctor === "AddMillisecond") {
-            return _U.update(model,
-            {currentTime: model.currentTime + $Time.millisecond});
-         } else {
-            return model;
-         }
-   });
-   var NoOp = {ctor: "NoOp"};
-   var AddMillisecond = {ctor: "AddMillisecond"};
-   var timeMailBox = $Signal.mailbox(NoOp);
-   var timeAddress = timeMailBox.address;
-   var timeActions = timeMailBox.signal;
-   var getCurrentDate = function (model) {
-      return $Date.fromTime(model.currentTime);
-   };
-   var view = function (model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([$Html.text($Basics.toString(A2($Date$Format.format,
-      "%Y-%m-%d",
-      getCurrentDate(model))))]));
-   };
-   var loadTime = $Native$CurrentTime.loadTime;
-   var init = {currentTime: loadTime};
-   var state = A3($Signal.foldp,update,init,timeActions);
-   var Model = function (a) {    return {currentTime: a};};
-   return _elm.TimeKeeper.values = {_op: _op
-                                   ,init: init
-                                   ,state: state
-                                   ,update: update
-                                   ,timeAddress: timeAddress
-                                   ,timeActions: timeActions
-                                   ,view: view
-                                   ,loadTime: loadTime
-                                   ,toItemListAction: toItemListAction
-                                   ,Model: Model
-                                   ,AddMillisecond: AddMillisecond
-                                   ,NoOp: NoOp};
-};
 Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
    "use strict";
@@ -13403,28 +13320,22 @@ Elm.Main.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm),
-   $TimeKeeper = Elm.TimeKeeper.make(_elm);
+   $Time = Elm.Time.make(_elm);
    var _op = {};
    var watchSignal = function (caption) {
       return $Signal.map($Debug.watch(caption));
    };
-   var timeKeeperState = A3($Signal.foldp,
-   $TimeKeeper.update,
-   $TimeKeeper.init,
-   A2($Signal.map,
-   function (x) {
-      return $TimeKeeper.AddMillisecond;
-   },
-   $Time.every($Time.millisecond)));
+   var toItemListAction = function (time) {
+      return $ItemList.TimeUpdate(time);
+   };
    var itemListState = A3($Signal.foldp,
    $ItemList.update,
    $ItemList.init,
    $Signal.mergeMany(_U.list([$ItemList.actions
                              ,$KeyboardInput.keyboardInput
                              ,A2($Signal.map,
-                             $TimeKeeper.toItemListAction,
-                             timeKeeperState)])));
+                             toItemListAction,
+                             $Time.every($Time.millisecond))])));
    var main = function () {
       var viewFeed = A2($Signal.map,
       $ItemList.view($ItemList.actionAddress),
@@ -13434,6 +13345,6 @@ Elm.Main.make = function (_elm) {
    return _elm.Main.values = {_op: _op
                              ,main: main
                              ,itemListState: itemListState
-                             ,timeKeeperState: timeKeeperState
+                             ,toItemListAction: toItemListAction
                              ,watchSignal: watchSignal};
 };
