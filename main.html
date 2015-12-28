@@ -12016,6 +12016,7 @@ Elm.ItemList.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $Item = Elm.Item.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -12179,37 +12180,59 @@ Elm.ItemList.make = function (_elm) {
                      return A2(compareDates,tupleOne,tupleTwo);
                   }
    });
+   var focusListIndex = function (model) {
+      var theItems = A2($List.map,
+      function (_p40) {
+         var _p41 = _p40;
+         return _p41._2;
+      },
+      model.items);
+      var filterDones = model.hideDone ? A2($List.filter,
+      function (x) {
+         return $Basics.not(x.done);
+      },
+      theItems) : theItems;
+      return $List.length(filterDones);
+   };
    var fixFocus$ = F3(function (acc,focusID,itemList) {
       var rest = $List.tail(itemList);
       var first = $List.head(itemList);
-      var _p40 = first;
-      if (_p40.ctor === "Nothing") {
+      var _p42 = first;
+      if (_p42.ctor === "Nothing") {
             return _U.list([]);
          } else {
-            var _p43 = _p40._0._2;
-            var _p42 = _p40._0._0;
-            var fixedModel = _U.eq(focusID,acc) ? _U.update(_p43,
-            {focus: true}) : _U.update(_p43,{focus: false});
-            var fixedItem = _U.eq(focusID,_p42) ? {ctor: "_Tuple3"
-                                                  ,_0: _p42
+            var _p45 = _p42._0._2;
+            var _p44 = _p42._0._0;
+            var fixedModel = _U.eq(focusID,acc) ? _U.update(_p45,
+            {focus: true}) : _U.update(_p45,{focus: false});
+            var fixedItem = _U.eq(focusID,_p44) ? {ctor: "_Tuple3"
+                                                  ,_0: _p44
                                                   ,_1: true
                                                   ,_2: fixedModel} : {ctor: "_Tuple3"
-                                                                     ,_0: _p42
+                                                                     ,_0: _p44
                                                                      ,_1: false
                                                                      ,_2: fixedModel};
-            var _p41 = rest;
-            if (_p41.ctor === "Nothing") {
+            var _p43 = rest;
+            if (_p43.ctor === "Nothing") {
                   return _U.list([fixedItem]);
                } else {
                   return A2($List._op["::"],
                   fixedItem,
-                  A3(fixFocus$,acc + 1,focusID,_p41._0));
+                  A3(fixFocus$,acc + 1,focusID,_p43._0));
                }
          }
    });
    var fixFocus = function (model) {
-      var newList = A3(fixFocus$,0,model.focusOn,model.items);
-      return _U.update(model,{items: newList});
+      var maxFocusLength = focusListIndex(model);
+      var newModel = function () {
+         if (_U.cmp(model.focusOn,maxFocusLength) > -1) {
+               var newFocusOn = _U.eq(maxFocusLength,
+               0) ? 0 : maxFocusLength - 1;
+               return _U.update(model,{focusOn: newFocusOn});
+            } else return model;
+      }();
+      var newList = A3(fixFocus$,0,newModel.focusOn,newModel.items);
+      return _U.update(newModel,{items: newList});
    };
    var altSort = function (model) {
       var newModel = _U.update(model,
@@ -12230,6 +12253,7 @@ Elm.ItemList.make = function (_elm) {
       var newModel = _U.update(model,{items: newItems});
       return newModel.altSort ? altSort(newModel) : mainSort(newModel);
    });
+   var ToggleHideDone = {ctor: "ToggleHideDone"};
    var DoneCurrent = {ctor: "DoneCurrent"};
    var PinCurrent = {ctor: "PinCurrent"};
    var TruncateCurrent = {ctor: "TruncateCurrent"};
@@ -12243,26 +12267,28 @@ Elm.ItemList.make = function (_elm) {
    var Modify = F2(function (a,b) {
       return {ctor: "Modify",_0: a,_1: b};
    });
-   var viewItem = F2(function (address,_p44) {
-      var _p45 = _p44;
-      return A2($Item.view,
-      A2($Signal.forwardTo,address,Modify(_p45._0)),
-      _p45._2);
-   });
-   var genDiv = F2(function (address,_p46) {
+   var viewItem = F2(function (address,_p46) {
       var _p47 = _p46;
+      return A2($Item.view,
+      A2($Signal.forwardTo,address,Modify(_p47._0)),
+      _p47._2);
+   });
+   var genDiv = F2(function (address,_p48) {
+      var _p49 = _p48;
       return A2($Html.div,
       _U.list([]),
       _U.list([A2(viewItem,
       address,
-      {ctor: "_Tuple3",_0: _p47._0,_1: _p47._1,_2: _p47._2})]));
+      {ctor: "_Tuple3",_0: _p49._0,_1: _p49._1,_2: _p49._2})]));
    });
    var view = F2(function (address,model) {
       var addReminderView = A2($AddReminder.view,
       A2($Signal.forwardTo,address,ModifyAddReminder),
       model.addReminder);
       var dones = takeDone(model);
-      var doneHtml = A2($List.map,genDiv(address),dones);
+      var doneHtml = model.hideDone ? _U.list([]) : A2($List.map,
+      genDiv(address),
+      dones);
       var todos = takeTodo(model);
       var todoHtml = A2($List.map,genDiv(address),todos);
       return A2($Html.div,
@@ -12279,9 +12305,10 @@ Elm.ItemList.make = function (_elm) {
       todoHtml),
       _U.list([A2($Html.div,
       _U.list([]),
-      _U.list([A2($Html.h1,
-      _U.list([]),
-      _U.list([$Html.text("Done")]))]))])),
+      _U.list([A2($Html.h1,_U.list([]),_U.list([$Html.text("Done")]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,ToggleHideDone)]),
+              _U.list([$Html.text("Toggle Hide Done Items")]))]))])),
       doneHtml),
       _U.list([A2($Html.div,
       _U.list([]),
@@ -12296,17 +12323,17 @@ Elm.ItemList.make = function (_elm) {
       return {ctor: "AddReminder",_0: a};
    };
    var update = F2(function (action,model) {
-      var _p48 = action;
-      switch (_p48.ctor)
+      var _p50 = action;
+      switch (_p50.ctor)
       {case "AddReminder":
-         var reminderModel = $Item.initReminder(_p48._0);
+         var reminderModel = $Item.initReminder(_p50._0);
            var newModel = _U.update(model,
            {items: A2($List._op["::"],
            {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: reminderModel},
            model.items)
            ,nextID: model.nextID + 1});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "AddEmail": var emailModel = $Item.initEmail(_p48._0);
+         case "AddEmail": var emailModel = $Item.initEmail(_p50._0);
            var newModel = _U.update(model,
            {items: A2($List._op["::"],
            {ctor: "_Tuple3",_0: model.nextID,_1: false,_2: emailModel},
@@ -12315,41 +12342,41 @@ Elm.ItemList.make = function (_elm) {
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
          case "NextFocus": var nextFocus = A2($Basics._op["%"],
            model.focusOn + 1,
-           $List.length(model.items));
+           focusListIndex(model));
            var newModel = _U.update(model,{focusOn: nextFocus});
            return fixFocus(newModel);
          case "PreviousFocus": var nextFocus = _U.cmp(model.focusOn - 1,
-           0) < 0 ? _U.eq($List.length(model.items),
-           0) ? 0 : $List.length(model.items) - 1 : model.focusOn - 1;
+           0) < 0 ? _U.eq(focusListIndex(model),
+           0) ? 0 : focusListIndex(model) - 1 : model.focusOn - 1;
            var newModel = _U.update(model,{focusOn: nextFocus});
            return fixFocus(newModel);
-         case "Modify": var updateModel = function (_p49) {
-              var _p50 = _p49;
-              var _p53 = _p50._0;
-              var _p52 = _p50._2;
-              var _p51 = _p50._1;
-              return _U.eq(_p53,_p48._0) ? {ctor: "_Tuple3"
-                                           ,_0: _p53
-                                           ,_1: _p51
-                                           ,_2: A2($Item.update,_p48._1,_p52)} : {ctor: "_Tuple3"
-                                                                                 ,_0: _p53
-                                                                                 ,_1: _p51
-                                                                                 ,_2: _p52};
+         case "Modify": var updateModel = function (_p51) {
+              var _p52 = _p51;
+              var _p55 = _p52._0;
+              var _p54 = _p52._2;
+              var _p53 = _p52._1;
+              return _U.eq(_p55,_p50._0) ? {ctor: "_Tuple3"
+                                           ,_0: _p55
+                                           ,_1: _p53
+                                           ,_2: A2($Item.update,_p50._1,_p54)} : {ctor: "_Tuple3"
+                                                                                 ,_0: _p55
+                                                                                 ,_1: _p53
+                                                                                 ,_2: _p54};
            };
            var newModel = _U.update(model,
            {items: A2($List.map,updateModel,model.items)});
            return newModel.altSort ? altSort(newModel) : mainSort(newModel);
-         case "ModifyAddReminder": var _p55 = _p48._0;
+         case "ModifyAddReminder": var _p57 = _p50._0;
            var updatedModel = function () {
-              var _p54 = _p55;
-              if (_p54.ctor === "AddReminder") {
-                    return A2(update,AddReminder(_p54._0),model);
+              var _p56 = _p57;
+              if (_p56.ctor === "AddReminder") {
+                    return A2(update,AddReminder(_p56._0),model);
                  } else {
                     return model;
                  }
            }();
            var updatedAddReminder = A2($AddReminder.update,
-           _p55,
+           _p57,
            model.addReminder);
            return _U.update(updatedModel,
            {addReminder: updatedAddReminder});
@@ -12365,25 +12392,31 @@ Elm.ItemList.make = function (_elm) {
            return A2(itemActionCurrent,$Item.TogglePin,model);
          case "DoneCurrent": var curr = currentItem(model);
            return A2(itemActionCurrent,$Item.ToggleDo,model);
+         case "ToggleHideDone":
+         var notHideDone = $Basics.not(model.hideDone);
+           var newModel = _U.update(model,{hideDone: notHideDone});
+           return fixFocus(newModel);
          default: return model;}
    });
    var initEmpty = {items: _U.list([])
                    ,nextID: 0
                    ,focusOn: 0
                    ,addReminder: $AddReminder.init
-                   ,altSort: false};
+                   ,altSort: false
+                   ,hideDone: false};
    var init = function () {
       var addEmails = A2($List.map,AddEmail,$Static.emails);
       var addReminders = A2($List.map,AddReminder,$Static.reminders);
       var updates = A2($List.append,addReminders,addEmails);
       return A3($List.foldl,update,initEmpty,updates);
    }();
-   var Model = F5(function (a,b,c,d,e) {
+   var Model = F6(function (a,b,c,d,e,f) {
       return {items: a
              ,nextID: b
              ,focusOn: c
              ,addReminder: d
-             ,altSort: e};
+             ,altSort: e
+             ,hideDone: f};
    });
    var actionMailBox = $Signal.mailbox(NoOp);
    var actions = actionMailBox.signal;
@@ -12409,7 +12442,8 @@ Elm.ItemList.make = function (_elm) {
                                  ,NoOp: NoOp
                                  ,TruncateCurrent: TruncateCurrent
                                  ,PinCurrent: PinCurrent
-                                 ,DoneCurrent: DoneCurrent};
+                                 ,DoneCurrent: DoneCurrent
+                                 ,ToggleHideDone: ToggleHideDone};
 };Elm.Set = Elm.Set || {};
 Elm.Set.make = function (_elm) {
    "use strict";

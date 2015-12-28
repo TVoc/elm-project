@@ -1,6 +1,7 @@
 module ItemList (Model, init, Action(..), update, view, actions, actionAddress, state) where
 
 import Html exposing (..)
+import Html.Events exposing (onClick)
 import Static
 import Item
 import Html.Attributes exposing (..)
@@ -33,6 +34,7 @@ type alias Model =
   , focusOn : Int
   , addReminder : AddReminder.Model
   , altSort : Bool
+  , hideDone : Bool
   }
 
 type alias ID = Int
@@ -57,6 +59,7 @@ initEmpty =
   , focusOn = 0
   , addReminder = AddReminder.init
   , altSort = False
+  , hideDone = False
   }
 
 {--
@@ -143,6 +146,7 @@ type Action
   | TruncateCurrent
   | PinCurrent
   | DoneCurrent
+  | ToggleHideDone
   --}
 
 update : Action -> Model -> Model
@@ -176,7 +180,7 @@ update action model =
           mainSort newModel
     NextFocus ->
       let
-        nextFocus = (model.focusOn + 1) % List.length model.items
+        nextFocus = (model.focusOn + 1) % (focusListIndex model)
         newModel =
           { model |
               focusOn = nextFocus
@@ -187,10 +191,10 @@ update action model =
       let
         nextFocus =
           if (model.focusOn - 1) < 0 then
-            if List.length model.items == 0 then
+            if (focusListIndex model) == 0 then
               0
             else
-              List.length model.items - 1
+              (focusListIndex model) - 1
           else
             model.focusOn - 1
         newModel =
@@ -263,6 +267,15 @@ update action model =
           currentItem model
       in
         itemActionCurrent Item.ToggleDo model
+    ToggleHideDone ->
+      let
+        notHideDone = not model.hideDone
+        newModel =
+          { model |
+              hideDone = notHideDone
+          }
+      in
+        fixFocus newModel
     NoOp ->
       model
     --}
@@ -290,9 +303,24 @@ altSort model =
 fixFocus : Model -> Model
 fixFocus model =
   let
-    newList = fixFocus' 0 model.focusOn model.items
+    maxFocusLength = focusListIndex model
+    newModel =
+      if model.focusOn >= maxFocusLength then
+        let
+          newFocusOn =
+            if maxFocusLength == 0 then
+              0
+            else
+              maxFocusLength - 1
+        in
+          { model |
+              focusOn = newFocusOn
+          }
+      else
+        model
+    newList = fixFocus' 0 newModel.focusOn newModel.items
   in
-    { model |
+    { newModel |
         items = newList
     }
 
@@ -328,7 +356,18 @@ fixFocus' acc focusID itemList =
             Just restList ->
               fixedItem :: (fixFocus' (acc + 1) focusID restList)
 
-
+focusListIndex : Model -> Int
+focusListIndex model =
+  let
+    theItems =
+      List.map (\(id, bool, itemModel) -> itemModel) model.items
+    filterDones =
+      if model.hideDone then
+        List.filter (\x -> not x.done) theItems
+      else
+        theItems
+  in
+    List.length filterDones
 
 
 mainComparison : (Int, Bool, Item.Model) -> (Int, Bool, Item.Model) -> Order
@@ -444,7 +483,11 @@ view address model =
     todos = takeTodo model
     dones = takeDone model
     todoHtml = List.map (genDiv address) todos
-    doneHtml = List.map (genDiv address) dones
+    doneHtml =
+      if model.hideDone then
+        []
+      else
+        List.map (genDiv address) dones
     addReminderView =
       AddReminder.view (Signal.forwardTo address ModifyAddReminder) model.addReminder
   in
@@ -453,7 +496,7 @@ view address model =
         `List.append`
         todoHtml
         `List.append`
-        [div [] [Html.h1 [] [Html.text "Done"]]]
+        [div [] [Html.h1 [] [Html.text "Done"], button [ onClick address ToggleHideDone ][ text "Toggle Hide Done Items" ]]]
         `List.append`
         doneHtml
         `List.append`
