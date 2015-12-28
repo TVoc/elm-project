@@ -65,13 +65,17 @@ Elm.KeyboardInput.make = function (_elm) {
    var toAltSort = A2(keyToAction,
    $ItemList.AltSort,
    keyWithAlt(_U.chr("s")));
+   var toHideAddReminder = A2(keyToAction,
+   $ItemList.ToggleHideAddReminder,
+   keyWithAlt(_U.chr("h")));
    var keyboardInput = $Signal.mergeMany(_U.list([toNext
                                                  ,toPrevious
                                                  ,toAltSort
                                                  ,toMainSort
                                                  ,toTruncate
                                                  ,toPin
-                                                 ,toDone]));
+                                                 ,toDone
+                                                 ,toHideAddReminder]));
    return _elm.KeyboardInput.values = {_op: _op
                                       ,keyWithAlt: keyWithAlt
                                       ,keyWithAltRelease: keyWithAltRelease
@@ -83,6 +87,7 @@ Elm.KeyboardInput.make = function (_elm) {
                                       ,toDone: toDone
                                       ,toAltSort: toAltSort
                                       ,toMainSort: toMainSort
+                                      ,toHideAddReminder: toHideAddReminder
                                       ,keyboardInput: keyboardInput
                                       ,watchSignal: watchSignal};
 };

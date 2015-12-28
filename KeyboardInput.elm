@@ -49,10 +49,13 @@ toMainSort : Signal ItemList.Action
 toMainSort =
   keyToAction ItemList.MainSort <| keyWithAltRelease 's'
 
+toHideAddReminder =
+  keyToAction ItemList.ToggleHideAddReminder <| keyWithAlt 'h'
+
 keyboardInput : Signal ItemList.Action
 keyboardInput =
    Signal.mergeMany [ toNext, toPrevious, toAltSort, toMainSort, toTruncate, toPin,
-                     toDone
+                     toDone, toHideAddReminder
                     ]
 
 watchSignal : String -> Signal a -> Signal a

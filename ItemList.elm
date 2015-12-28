@@ -138,6 +138,7 @@ type Action
   | PreviousFocus
   | Modify ID Item.Action
   | ModifyAddReminder AddReminder.Action
+  | ToggleHideAddReminder
   | AltSort
   | MainSort
   {--}
@@ -232,6 +233,10 @@ update action model =
         { updatedModel |
             addReminder = updatedAddReminder
         }
+    ToggleHideAddReminder ->
+      { model |
+          addReminder = AddReminder.update AddReminder.ToggleHide model.addReminder
+      }
     AltSort ->
       let
         newModel =
