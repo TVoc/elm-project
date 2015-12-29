@@ -357,7 +357,7 @@ fixFocus' acc focusID itemList =
       Just (itemID, focus, itemModel) ->
         let
           fixedModel =
-            if focusID == acc then
+            if focusID == acc && not itemModel.snooze then
               { itemModel |
                   focus = True
               }
@@ -366,16 +366,21 @@ fixFocus' acc focusID itemList =
                   focus = False
               }
           fixedItem =
-            if focusID == itemID then
+            if focusID == itemID && not itemModel.snooze then
               (itemID, True, fixedModel)
             else
               (itemID, False, fixedModel)
+          newAcc =
+            if not itemModel.snooze then
+              acc + 1
+            else
+              acc
         in
           case rest of
             Nothing ->
               [fixedItem]
             Just restList ->
-              fixedItem :: (fixFocus' (acc + 1) focusID restList)
+              fixedItem :: (fixFocus' newAcc focusID restList)
 
 focusListIndex : Model -> Int
 focusListIndex model =
@@ -387,9 +392,14 @@ focusListIndex model =
         List.filter (\x -> not x.done) theItems
       else
         theItems
+    noSnooze =
+      filterSnooze filterDones
   in
-    List.length filterDones
+    List.length noSnooze
 
+filterSnooze : List(Item.Model) -> List(Item.Model)
+filterSnooze items =
+  List.filter (\x -> not x.snooze) items
 
 mainComparison : (Int, Bool, Item.Model) -> (Int, Bool, Item.Model) -> Order
 mainComparison (_, _, one) (_, _, two) =
@@ -469,7 +479,9 @@ itemActionCurrent' acc focusID action itemList =
               Just theTail ->
                 theTail
         in
-          if acc == focusID then
+          if itemModel.snooze then
+            (itemID, bool, itemModel) :: (itemActionCurrent' acc focusID action restList)
+          else if acc == focusID then
             (itemID, bool, (Item.update action itemModel)) :: restList
           else (itemID, bool, itemModel) :: (itemActionCurrent' (acc + 1) focusID action restList)
 -- VIEW
@@ -524,11 +536,18 @@ takeTodo' items =
         if itemModel.done then
           []
         else
-          case rest of
-            Nothing ->
-              [(itemID, bool, itemModel)]
-            Just restList ->
-              (itemID, bool, itemModel) :: (takeTodo' restList)
+          let
+            newHead =
+              if itemModel.snooze then
+                []
+              else
+                [(itemID, bool, itemModel)]
+          in
+            case rest of
+              Nothing ->
+                newHead
+              Just restList ->
+                newHead `List.append` (takeTodo' restList)
 
 takeDone : Model -> List(ID, Bool, Item.Model)
 takeDone model =
@@ -544,11 +563,18 @@ takeDone' items =
         []
       Just (itemID, bool, itemModel) ->
         if itemModel.done then
-          case rest of
-            Nothing ->
-              [(itemID, bool, itemModel)]
-            Just restList ->
-              (itemID, bool, itemModel) :: (takeDone' restList)
+          let
+            newHead =
+              if itemModel.snooze then
+                []
+              else
+                [(itemID, bool, itemModel)]
+          in
+            case rest of
+              Nothing ->
+                newHead
+              Just restList ->
+                newHead `List.append` (takeDone' restList)
         else
           case rest of
             Nothing ->

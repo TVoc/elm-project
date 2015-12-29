@@ -3,6 +3,7 @@ module Item (Model, initReminder, initEmail, Action(..), update, view, extractDa
 import Static
 import String
 import Html exposing (..)
+import Html.Events exposing (on, targetValue)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing(..)
 import Date
@@ -51,6 +52,8 @@ type alias Model =
   , truncated : Bool
   , focus : Bool
   , deadlineExpired : Bool
+  , snoozeDate : String
+  , snooze : Bool
   }
 
 {--
@@ -66,6 +69,8 @@ initReminder reminder =
     , truncated = True
     , focus = False
     , deadlineExpired = False
+    , snoozeDate = "2015-01-01"
+    , snooze = False
   }
 
 initEmail : Static.Email -> Model
@@ -78,6 +83,8 @@ initEmail email =
     , truncated = True
     , focus = False
     , deadlineExpired = False
+    , snoozeDate = "2015-01-01"
+    , snooze = False
   }
 
 extractReminder : Model -> Static.Reminder
@@ -161,6 +168,8 @@ type Action
   | TogglePin
   | ToggleTruncate
   | TimeUpdate Time
+  | ChangeSnooze String
+  | DoSnooze
   {--}
   | NoOp
   --}
@@ -200,17 +209,45 @@ update action model =
         Reminder ->
           let
             theReminder = extractReminder model
+            snoozeBool =
+              if not model.snooze then
+                False
+              else if time >= (Utils.dateStringToTime model.snoozeDate) then
+                False
+              else
+                True
           in
-            if time > (Utils.dateStringToTime theReminder.deadline) then
+            if time >= (Utils.dateStringToTime theReminder.deadline) then
               { model |
                   deadlineExpired = True
+              ,   snooze = snoozeBool
               }
             else
               { model |
                   deadlineExpired = False
+              ,   snooze = snoozeBool
               }
         Email ->
-          model
+          let
+            snoozeBool =
+              if not model.snooze then
+                False
+              else if time >= (Utils.dateStringToTime model.snoozeDate) then
+                False
+              else
+                True
+          in
+            { model |
+                snooze = snoozeBool
+            }
+    ChangeSnooze date ->
+      { model |
+          snoozeDate = date
+      }
+    DoSnooze ->
+      { model |
+          snooze = True
+      }
     {--}
     NoOp ->
       model
@@ -244,7 +281,7 @@ viewEmail address model =
               , doUndoButton address model
               , pinUnpinButton address model
               , br [] []
-              , div [] [ text ("\r\n\r\ndate: " `String.append` email.date) ]
+              , div [] [ text ("\r\n\r\ndate: " `String.append` email.date), fieldInput "date" address ChangeSnooze model.snoozeDate, snoozeButton address model ]
               , br [] []
             ]
         else
@@ -255,7 +292,7 @@ viewEmail address model =
               , doUndoButton address model
               , pinUnpinButton address model
               , br [] []
-              , div [] [ text ("\r\n\r\ndate: " `String.append` email.date) ]
+              , div [] [ text ("\r\n\r\ndate: " `String.append` email.date), fieldInput "date" address ChangeSnooze model.snoozeDate, snoozeButton address model ]
               , br [] []
             ]
     Reminder ->
@@ -279,7 +316,7 @@ viewReminder address model =
             , doUndoButton address model
             , pinUnpinButton address model
             , div [] [ text ("\r\n\r\ndate: " `String.append` reminder.created) ]
-            , div [] [ text ("\r\n\r\ndeadline: " `String.append` reminder.deadline)]
+            , div [] [ text ("\r\n\r\ndeadline: " `String.append` reminder.deadline), fieldInput "date" address ChangeSnooze model.snoozeDate, snoozeButton address model ]
             , br [] []
           ]
     Email ->
@@ -345,6 +382,22 @@ pinUnpinButton address model =
     button [ onClick address TogglePin ] [ text "Unpin" ]
   else
     button [ onClick address TogglePin ] [ text "Pin" ]
+
+fieldInput : String -> Signal.Address Action -> (String -> Action) -> String -> Html
+fieldInput fieldType address toAction content =
+  div []
+    [ div [] []
+    , input
+        [ type' fieldType
+        , value content
+        , on "input" targetValue (\string -> Signal.message address (toAction string))
+        ]
+        []
+    ]
+
+snoozeButton : Signal.Address Action -> Model -> Html
+snoozeButton address model =
+  button [ onClick address DoSnooze] [ text "Snooze" ]
 
 showEmailBodyTrunc : Model -> String
 showEmailBodyTrunc model =
