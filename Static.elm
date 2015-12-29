@@ -59,4 +59,10 @@ emails =
     , body = """This is the body of an email with less than 200 characters."""
     , date = "2015-09-30"
     }
+  , { from = "hello@test.me"
+    , to = "goodbye@test.me"
+    , title = "Another short email"
+    , body = """This is another short email."""
+    , date = "2015-09-30"
+    }
   ]

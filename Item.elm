@@ -1,4 +1,14 @@
-module Item (Model, initReminder, initEmail, Action(..), update, view, extractDate, extractTitle) where
+module Item
+  ( Model
+  ,  initReminder
+  , initEmail
+  , Action(..)
+  , update
+  , view
+  , extractDate
+  , extractTitle
+  , ItemType(Email, Reminder)
+  ) where
 
 import Static
 import String

@@ -6,13 +6,16 @@ Elm.Main.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
    $ItemList = Elm.ItemList.make(_elm),
+   $JsonReader = Elm.JsonReader.make(_elm),
    $KeyboardInput = Elm.KeyboardInput.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm),
    $Time = Elm.Time.make(_elm);
    var _op = {};
    var watchSignal = function (caption) {
@@ -21,23 +24,96 @@ Elm.Main.make = function (_elm) {
    var toItemListAction = function (time) {
       return $ItemList.TimeUpdate(time);
    };
-   var itemListState = A3($Signal.foldp,
-   $ItemList.update,
-   $ItemList.init,
-   $Signal.mergeMany(_U.list([$ItemList.actions
-                             ,$KeyboardInput.keyboardInput
-                             ,A2($Signal.map,
-                             toItemListAction,
-                             $Time.every($Time.millisecond))])));
+   var app = function () {
+      var jsonItemListFilterFunction = function (jsonReaderModel) {
+         return jsonReaderModel.hasEmails;
+      };
+      var jsonFetchUrl = "https://crossorigin.me/https://people.cs.kuleuven.be/~bob.reynders/2015-2016/emails.json";
+      var initialJsonReaderModel = A2($JsonReader.init,
+      jsonFetchUrl,
+      $Time.minute);
+      var jsonUpdateStep = F2(function (action,_p0) {
+         var _p1 = _p0;
+         return A2($JsonReader.update,action,_p1._0);
+      });
+      var update = F2(function (actions,_p2) {
+         var _p3 = _p2;
+         return A3($List.foldl,
+         jsonUpdateStep,
+         {ctor: "_Tuple2",_0: _p3._0,_1: $Effects.none},
+         actions);
+      });
+      var timeSignal = $Time.every($Time.millisecond);
+      var itemListActions = A2($Signal.map,
+      function (time) {
+         return $ItemList.TimeUpdate(time);
+      },
+      timeSignal);
+      var jsonRequestActions = A2($Signal.map,
+      function (_p4) {
+         return $JsonReader.TimeUpdate;
+      },
+      timeSignal);
+      var messages = $Signal.mailbox(_U.list([]));
+      var singleton = function (action) {
+         return _U.list([action]);
+      };
+      var address = A2($Signal.forwardTo,messages.address,singleton);
+      var requestActionsToList = A2($Signal.map,
+      singleton,
+      jsonRequestActions);
+      var inputs = A2($Signal.merge,
+      messages.signal,
+      requestActionsToList);
+      var jsonReadState = A3($Signal.foldp,
+      update,
+      {ctor: "_Tuple2",_0: initialJsonReaderModel,_1: $Effects.none},
+      inputs);
+      var allJsonReaderModels = A2($Signal.map,
+      function (x) {
+         return $Basics.fst(x);
+      },
+      jsonReadState);
+      var filteredJsonReaderModels = A3($Signal.filter,
+      jsonItemListFilterFunction,
+      initialJsonReaderModel,
+      allJsonReaderModels);
+      var jsonItemListActions = A2($Signal.map,
+      function (model) {
+         return $ItemList.AddAllEmails(model.emailList);
+      },
+      filteredJsonReaderModels);
+      var theJsonEffectsSignal = A2($Signal.map,
+      function (x) {
+         return $Basics.snd(x);
+      },
+      jsonReadState);
+      return {itemListState: A3($Signal.foldp,
+             $ItemList.update,
+             $ItemList.init,
+             $Signal.mergeMany(_U.list([jsonItemListActions
+                                       ,$ItemList.actions
+                                       ,$KeyboardInput.keyboardInput
+                                       ,itemListActions])))
+             ,jsonTasksSignal: A2($Signal.map,
+             $Effects.toTask(address),
+             theJsonEffectsSignal)};
+   }();
    var main = function () {
       var viewFeed = A2($Signal.map,
       $ItemList.view($ItemList.actionAddress),
-      itemListState);
+      app.itemListState);
       return viewFeed;
    }();
+   var App = F2(function (a,b) {
+      return {itemListState: a,jsonTasksSignal: b};
+   });
+   var jsonRequests = Elm.Native.Task.make(_elm).performSignal("jsonRequests",
+   app.jsonTasksSignal);
    return _elm.Main.values = {_op: _op
+                             ,App: App
+                             ,app: app
                              ,main: main
-                             ,itemListState: itemListState
                              ,toItemListAction: toItemListAction
                              ,watchSignal: watchSignal};
 };

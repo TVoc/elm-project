@@ -8,6 +8,10 @@ import AddReminder
 import Graphics.Element exposing (show)
 import Time exposing (Time)
 import Utils
+import JsonReader
+import Effects exposing (Effects, Never)
+import Task
+import List
 
 -- Name:
 -- Student ID:
@@ -66,12 +70,72 @@ import Utils
 
 -- Start of program
 
+port jsonRequests : Signal (Task.Task Never ())
+port jsonRequests =
+  app.jsonTasksSignal
+
+type alias App =
+  { itemListState : Signal ItemList.Model
+  , jsonTasksSignal : Signal (Task.Task Never ())
+  }
+
+app : App
+app =
+  let
+    singleton action = [ action ]
+
+    messages =
+        Signal.mailbox []
+    address =
+        Signal.forwardTo messages.address singleton
+
+    timeSignal =
+      Time.every Time.millisecond
+
+    itemListActions =
+      Signal.map (\time -> ItemList.TimeUpdate time) timeSignal
+    jsonRequestActions =
+      Signal.map (\_ -> JsonReader.TimeUpdate) timeSignal
+
+    jsonUpdateStep action (oldModel, _) = JsonReader.update action oldModel
+    update actions (model, _) =
+        List.foldl jsonUpdateStep (model, Effects.none) actions
+
+    jsonFetchUrl =
+      "https://crossorigin.me/https://people.cs.kuleuven.be/~bob.reynders/2015-2016/emails.json"
+
+    initialJsonReaderModel =
+      JsonReader.init jsonFetchUrl Time.minute
+
+    requestActionsToList =
+      Signal.map singleton jsonRequestActions
+    inputs =
+      Signal.merge messages.signal requestActionsToList
+    jsonReadState =
+      Signal.foldp update (initialJsonReaderModel, Effects.none) inputs
+
+    allJsonReaderModels =
+      Signal.map (\x -> fst x) jsonReadState
+    jsonItemListFilterFunction jsonReaderModel =
+      jsonReaderModel.hasEmails
+    filteredJsonReaderModels =
+      Signal.filter jsonItemListFilterFunction initialJsonReaderModel allJsonReaderModels
+    jsonItemListActions =
+      Signal.map (\model -> ItemList.AddAllEmails model.emailList) filteredJsonReaderModels
+
+    theJsonEffectsSignal =
+      Signal.map (\x -> snd x) jsonReadState
+  in
+    { itemListState = Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [jsonItemListActions, ItemList.actions, KeyboardInput.keyboardInput, itemListActions])
+    , jsonTasksSignal = Signal.map (Effects.toTask address) theJsonEffectsSignal
+    }
+
 {--}
 main : Signal Html.Html
 main =
   let
     viewFeed =
-      Signal.map (ItemList.view ItemList.actionAddress) itemListState
+      Signal.map (ItemList.view ItemList.actionAddress) app.itemListState
   in
     viewFeed
 --}
@@ -81,9 +145,11 @@ main =
   Signal.map show (Time.every Time.millisecond)
 --}
 
+{--
 itemListState : Signal ItemList.Model
 itemListState =
   Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [ItemList.actions, KeyboardInput.keyboardInput, Signal.map toItemListAction (Time.every Time.millisecond)])
+--}
 
 {--
 timeKeeperState : Signal TimeKeeper.Model

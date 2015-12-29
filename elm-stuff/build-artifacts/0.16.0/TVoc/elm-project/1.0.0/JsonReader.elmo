@@ -1,0 +1,91 @@
+Elm.JsonReader = Elm.JsonReader || {};
+Elm.JsonReader.make = function (_elm) {
+   "use strict";
+   _elm.JsonReader = _elm.JsonReader || {};
+   if (_elm.JsonReader.values) return _elm.JsonReader.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $Http = Elm.Http.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Static = Elm.Static.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var apply = F2(function (func,value) {
+      return A3($Json$Decode.object2,
+      F2(function (x,y) {    return x(y);}),
+      func,
+      value);
+   });
+   var emailDecoder = A2(apply,
+   A2(apply,
+   A2(apply,
+   A2(apply,
+   A2($Json$Decode.map,
+   $Static.Email,
+   A2($Json$Decode._op[":="],"from",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"to",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"title",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"date",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"body",$Json$Decode.string));
+   var emailListDecoder = $Json$Decode.list(emailDecoder);
+   var Input = function (a) {    return {ctor: "Input",_0: a};};
+   var getJson = function (requestUrl) {
+      return $Effects.task(A2($Task.map,
+      Input,
+      $Task.toMaybe(A2($Http.get,emailListDecoder,requestUrl))));
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      if (_p0.ctor === "TimeUpdate") {
+            var newModel = _U.cmp(model.counter + 1,
+            model.maxCounter) > -1 ? _U.update(model,
+            {counter: 0,hasEmails: false}) : _U.update(model,
+            {counter: model.counter + 1,hasEmails: false});
+            return _U.cmp(model.counter + 1,
+            model.maxCounter) > -1 ? {ctor: "_Tuple2"
+                                     ,_0: newModel
+                                     ,_1: getJson(newModel.requestFrom)} : {ctor: "_Tuple2"
+                                                                           ,_0: newModel
+                                                                           ,_1: $Effects.none};
+         } else {
+            var newModel = _U.update(model,
+            {emailList: A2($Maybe.withDefault,model.emailList,_p0._0)
+            ,hasEmails: true});
+            return {ctor: "_Tuple2",_0: newModel,_1: $Effects.none};
+         }
+   });
+   var TimeUpdate = {ctor: "TimeUpdate"};
+   var taskMailbox = $Signal.mailbox($Effects.none);
+   var init = F2(function (request,theCounter) {
+      return {requestFrom: request
+             ,emailList: _U.list([])
+             ,hasEmails: false
+             ,counter: theCounter
+             ,maxCounter: theCounter};
+   });
+   var Model = F5(function (a,b,c,d,e) {
+      return {requestFrom: a
+             ,emailList: b
+             ,hasEmails: c
+             ,counter: d
+             ,maxCounter: e};
+   });
+   return _elm.JsonReader.values = {_op: _op
+                                   ,Model: Model
+                                   ,init: init
+                                   ,taskMailbox: taskMailbox
+                                   ,TimeUpdate: TimeUpdate
+                                   ,Input: Input
+                                   ,update: update
+                                   ,emailListDecoder: emailListDecoder
+                                   ,emailDecoder: emailDecoder
+                                   ,apply: apply
+                                   ,getJson: getJson};
+};

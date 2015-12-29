@@ -136,6 +136,7 @@ emailListBuilder acc list =
 type Action
   = AddReminder Static.Reminder
   | AddEmail Static.Email
+  | AddAllEmails EmailList
   | NextFocus
   | PreviousFocus
   | Modify ID Item.Action
@@ -152,6 +153,9 @@ type Action
   | ToggleHideDone
   | TimeUpdate Time
   --}
+
+type alias EmailList =
+  List Static.Email
 
 update : Action -> Model -> Model
 update action model =
@@ -182,6 +186,20 @@ update action model =
           altSort newModel
         else
           mainSort newModel
+    AddAllEmails emailList ->
+      let
+        emails =
+          allEmails model
+        memberFunctions =
+          List.map (\mail -> List.member mail) emailList
+        present =
+          List.map (\x -> x emails) memberFunctions
+        newMails =
+          emailMatchFilter present emails
+        updates =
+          List.map AddEmail newMails
+      in
+        List.foldl update model updates
     NextFocus ->
       let
         nextFocus = (model.focusOn + 1) % (focusListIndex model)
@@ -400,6 +418,59 @@ focusListIndex model =
 filterSnooze : List(Item.Model) -> List(Item.Model)
 filterSnooze items =
   List.filter (\x -> not x.snooze) items
+
+allEmails : Model -> EmailList
+allEmails model =
+  let
+    filterFunction itemModel =
+      case itemModel.email of
+        Just _ -> True
+        Nothing -> False
+    finalFunction =
+      List.filter filterFunction
+    emptyMail =
+      { from = ""
+      , to = ""
+      , title = ""
+      , body = ""
+      , date = ""
+      }
+    remainingModels =
+      finalFunction (List.map (\(id, bool, theModel) -> theModel) model.items)
+  in
+    List.map (\model -> Maybe.withDefault emptyMail model.email) remainingModels
+
+emailMatchFilter : List Bool -> List (Static.Email) -> List (Static.Email)
+emailMatchFilter present emails =
+  let
+    presentFirst = List.head present
+    emailsFirst = List.head emails
+    presentRest = List.tail present
+    emailsRest = List.tail emails
+  in
+    case presentFirst of
+      Nothing ->
+        []
+      Just isPresent ->
+        case emailsFirst of
+          Nothing ->
+            []
+          Just email ->
+            case presentRest of
+              Nothing ->
+                if isPresent then
+                  [email]
+                else
+                  []
+              Just presentTail ->
+                case emailsRest of
+                  Nothing ->
+                    []
+                  Just emailsTail ->
+                    if isPresent then
+                      email :: emailMatchFilter presentTail emailsTail
+                    else
+                      emailMatchFilter presentTail emailsTail
 
 mainComparison : (Int, Bool, Item.Model) -> (Int, Bool, Item.Model) -> Order
 mainComparison (_, _, one) (_, _, two) =
