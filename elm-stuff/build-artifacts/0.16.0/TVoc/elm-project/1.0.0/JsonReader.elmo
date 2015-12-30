@@ -32,9 +32,13 @@ Elm.JsonReader.make = function (_elm) {
    A2($Json$Decode._op[":="],"from",$Json$Decode.string)),
    A2($Json$Decode._op[":="],"to",$Json$Decode.string)),
    A2($Json$Decode._op[":="],"title",$Json$Decode.string)),
-   A2($Json$Decode._op[":="],"date",$Json$Decode.string)),
-   A2($Json$Decode._op[":="],"body",$Json$Decode.string));
-   var emailListDecoder = $Json$Decode.list(emailDecoder);
+   A2($Json$Decode._op[":="],"body",$Json$Decode.string)),
+   A2($Json$Decode._op[":="],"date",$Json$Decode.string));
+   var emailListDecoder = A2($Json$Decode.object1,
+   $Basics.identity,
+   A2($Json$Decode._op[":="],
+   "emails",
+   $Json$Decode.list(emailDecoder)));
    var Input = function (a) {    return {ctor: "Input",_0: a};};
    var getJson = function (requestUrl) {
       return $Effects.task(A2($Task.map,

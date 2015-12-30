@@ -59,10 +59,10 @@ initEmpty =
   { items = []
   , nextID = 0
   , focusOn = 0
-  , addReminder = AddReminder.init False
+  , addReminder = AddReminder.init True
   , altSort = False
   , hideDone = False
-    }
+  }
 
 {--
 init : Model
@@ -188,14 +188,18 @@ update action model =
           mainSort newModel
     AddAllEmails emailList ->
       let
+        {--}
         emails =
           allEmails model
         memberFunctions =
           List.map (\mail -> List.member mail) emailList
         present =
-          List.map (\x -> x emails) memberFunctions
+          List.map (\member -> member emails) memberFunctions
+        tuples =
+          List.map2 (,) present emailList
         newMails =
-          emailMatchFilter present emails
+          emailMatchFilter tuples
+        --}
         updates =
           List.map AddEmail newMails
       in
@@ -440,37 +444,20 @@ allEmails model =
   in
     List.map (\model -> Maybe.withDefault emptyMail model.email) remainingModels
 
-emailMatchFilter : List Bool -> List (Static.Email) -> List (Static.Email)
-emailMatchFilter present emails =
+emailMatchFilter : List (Bool, Static.Email) -> List (Static.Email)
+emailMatchFilter tupleList =
   let
-    presentFirst = List.head present
-    emailsFirst = List.head emails
-    presentRest = List.tail present
-    emailsRest = List.tail emails
+    first = List.head tupleList
+    rest = Maybe.withDefault [] (List.tail tupleList)
   in
-    case presentFirst of
+    case first of
       Nothing ->
         []
-      Just isPresent ->
-        case emailsFirst of
-          Nothing ->
-            []
-          Just email ->
-            case presentRest of
-              Nothing ->
-                if isPresent then
-                  [email]
-                else
-                  []
-              Just presentTail ->
-                case emailsRest of
-                  Nothing ->
-                    []
-                  Just emailsTail ->
-                    if isPresent then
-                      email :: emailMatchFilter presentTail emailsTail
-                    else
-                      emailMatchFilter presentTail emailsTail
+      Just (present, mail) ->
+        if not present then
+          mail :: emailMatchFilter rest
+        else
+          emailMatchFilter rest
 
 mainComparison : (Int, Bool, Item.Model) -> (Int, Bool, Item.Model) -> Order
 mainComparison (_, _, one) (_, _, two) =
@@ -582,6 +569,16 @@ view address model =
         `List.append`
         [div [] [addReminderView]]
       )
+
+genMailView : Static.Email -> Html
+genMailView email =
+  div []
+    [ text email.from
+    , text email.to
+    , text email.title
+    , text email.body
+    , text email.date
+    ]
 
 genDiv : Signal.Address Action -> (ID, Bool, Item.Model) -> Html
 genDiv address (itemID, bool, itemModel) =

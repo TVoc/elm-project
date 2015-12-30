@@ -49,6 +49,7 @@ update action model =
     TimeUpdate ->
       let
         newModel =
+          {--}
           if (model.counter + 1) >= model.maxCounter then
             { model |
                 counter = 0
@@ -59,6 +60,7 @@ update action model =
                 counter = model.counter + 1
             ,   hasEmails = False
             }
+          --}
       in
         if (model.counter + 1) >= model.maxCounter then
           (newModel, getJson newModel.requestFrom)
@@ -88,7 +90,8 @@ getEmailsFromString string =
 
 emailListDecoder : Json.Decoder EmailList
 emailListDecoder =
-  Json.list emailDecoder
+  Json.object1 identity
+    ("emails" := Json.list emailDecoder)
 
 emailDecoder : Json.Decoder Static.Email
 emailDecoder =
@@ -99,9 +102,9 @@ emailDecoder =
     `apply`
     ("title" := Json.string)
     `apply`
-    ("date" := Json.string)
-    `apply`
     ("body" := Json.string)
+    `apply`
+    ("date" := Json.string)
 
 apply : Json.Decoder (a -> b) -> Json.Decoder a -> Json.Decoder b
 apply func value =

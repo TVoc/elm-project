@@ -13,66 +13,76 @@ import Effects exposing (Effects, Never)
 import Task
 import List
 
--- Name:
--- Student ID:
+-- Name: Thomas Vochten
+-- Student ID: r0300128
 
 
 -- * Add a hotkey to toggle the visibility of 'done' items.
--- Status: Completed / Attempted / Unattempted
--- Summary:
+-- Status: Completed
+-- Summary: Alt + I toggles the visibility of done items.
+--          In addition, there is a button under the Done header
+--          that does the same
 
 
 -- * Hide the 'add reminder' functionality and add a hotkey to toggle its
 -- * visibility.
--- Status: Completed / Attempted / Unattempted
--- Summary:
+-- Status: Completed
+-- Summary: On start-up, the add reminder functionality is hidden.
+--          To show it, either press Alt + H or click the
+--          "Unhide Add Reminder" button
 
 
 -- * Put the current date as the default in the date picker when adding
 -- * reminders.
--- Status: Completed / Attempted / Unattempted
--- Summary:
+-- Status: Completed
+-- Summary: On each time update, the current time is fed into the
+--          AddReminder module, which converts that into a date
 
 
 -- * Add a deadline property to reminders and mark all reminders that are past
 -- * their deadline.
--- Status: Completed / Attempted / Unattempted
--- Summary:
+-- Status: Completed
+-- Summary: All reminders that are past their deadline have a red background
+--          in the item feed. All statically loaded reminders have their
+--          "created" date as deadline. There seems to be some lag on the time
+--          signal which may slow the passage of time in the program, however.
 
 
 -- * Add a 'snooze' feature to items, to 'snooze' an item you must provide a
 -- * date on which the item has to 'un-snooze'. 'snoozed' items are not visible.
--- Status: Completed / Attempted / Unattempted
--- Summary:
+-- Status: Completed
+-- Summary: Items keep track of whether they're snoozed and, if so,
+--          when to unsnooze. Based on that, the ItemList can decide whether to
+--          show an item. The same remark made for the deadline extension applies
+--          here regarding to time signal.
 
 
 -- * On startup, read e-mails from a Json document at this url:
 -- * http://people.cs.kuleuven.be/~bob.reynders/2015-2016/emails.json
--- Status: Completed / Attempted / Unattempted
--- Summary:
+-- Status: Completed
+-- Summary: The given url is prefixed with https://crossorigin.me.
+--          The e-mails there show up in the feed on startup.
 
 
 -- * Periodically check for e-mails from Json (same url).
--- Status: Completed / Attempted / Unattempted
--- Summary:
+-- Status: Completed
+-- Summary: Normally, the JsonReader fetches the e-mails every minute.
+--          However, there seems to be a bit of lag on the time signal,
+--          so it's more like every two to three minutes.
 
 
 -- * Add persistence to your application by using Html local storage so that
 -- * newly added reminders are still there after a reload.
--- Status: Completed / Attempted / Unattempted
+-- Status: Unattempted
 -- Summary:
 
 
 -- * Come up with your own extension!
--- Status: Completed / Attempted / Unattempted
+-- Status: Unattempted
 -- Summary:
 
 
 -- Start of program
-
-port jsonRequests : Signal (Task.Task Never ())
-port jsonRequests =
-  app.jsonTasksSignal
 
 type alias App =
   { itemListState : Signal ItemList.Model
@@ -97,7 +107,11 @@ app =
     jsonRequestActions =
       Signal.map (\_ -> JsonReader.TimeUpdate) timeSignal
 
-    jsonUpdateStep action (oldModel, _) = JsonReader.update action oldModel
+    jsonUpdateStep action (oldModel, accumulatedEffects) =
+        let
+            (newModel, additionalEffects) = JsonReader.update action oldModel
+        in
+            (newModel, Effects.batch [accumulatedEffects, additionalEffects])
     update actions (model, _) =
         List.foldl jsonUpdateStep (model, Effects.none) actions
 
@@ -116,18 +130,18 @@ app =
 
     allJsonReaderModels =
       Signal.map (\x -> fst x) jsonReadState
+    {--}
     jsonItemListFilterFunction jsonReaderModel =
       jsonReaderModel.hasEmails
     filteredJsonReaderModels =
       Signal.filter jsonItemListFilterFunction initialJsonReaderModel allJsonReaderModels
+    --}
     jsonItemListActions =
       Signal.map (\model -> ItemList.AddAllEmails model.emailList) filteredJsonReaderModels
 
-    theJsonEffectsSignal =
-      Signal.map (\x -> snd x) jsonReadState
   in
     { itemListState = Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [jsonItemListActions, ItemList.actions, KeyboardInput.keyboardInput, itemListActions])
-    , jsonTasksSignal = Signal.map (Effects.toTask address) theJsonEffectsSignal
+    , jsonTasksSignal = Signal.map (Effects.toTask messages.address << snd) jsonReadState
     }
 
 {--}
@@ -140,27 +154,7 @@ main =
     viewFeed
 --}
 
-{--
-main =
-  Signal.map show (Time.every Time.millisecond)
---}
-
-{--
-itemListState : Signal ItemList.Model
-itemListState =
-  Signal.foldp ItemList.update ItemList.init (Signal.mergeMany [ItemList.actions, KeyboardInput.keyboardInput, Signal.map toItemListAction (Time.every Time.millisecond)])
---}
-
-{--
-timeKeeperState : Signal TimeKeeper.Model
-timeKeeperState =
-  Signal.foldp TimeKeeper.update TimeKeeper.init (Signal.map (\x -> TimeKeeper.AddMillisecond) (Time.every Time.millisecond))
---}
-
-toItemListAction : Time -> ItemList.Action
-toItemListAction time =
-  ItemList.TimeUpdate time
-
-watchSignal : String -> Signal a -> Signal a
-watchSignal caption = Signal.map (Debug.watch caption)
+port jsonRequests : Signal (Task.Task Never ())
+port jsonRequests =
+  app.jsonTasksSignal
 --}
